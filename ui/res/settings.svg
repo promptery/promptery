@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="96"
+   height="96"
+   viewBox="0 0 96 96"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+   sodipodi:docname="icons-promptery.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="false"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     showgrid="true"
+     inkscape:zoom="4"
+     inkscape:cx="19.75"
+     inkscape:cy="-17.375"
+     inkscape:window-width="1936"
+     inkscape:window-height="1298"
+     inkscape:window-x="1981"
+     inkscape:window-y="55"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       id="grid1"
+       units="px"
+       originx="-200"
+       originy="-200"
+       spacingx="1"
+       spacingy="1"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="4"
+       dotted="false"
+       gridanglex="30"
+       gridanglez="30"
+       visible="true" />
+    <inkscape:grid
+       id="grid2"
+       units="px"
+       originx="-200"
+       originy="-200"
+       spacingx="100"
+       spacingy="100"
+       empcolor="#0024e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="1"
+       dotted="false"
+       gridanglex="30"
+       gridanglez="30"
+       visible="true" />
+    <inkscape:grid
+       id="grid3"
+       units="px"
+       originx="-204"
+       originy="-204"
+       spacingx="100"
+       spacingy="100"
+       empcolor="#0024e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="1"
+       dotted="false"
+       gridanglex="30"
+       gridanglez="30"
+       visible="true"
+       enabled="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-200,-200)">
+    <rect
+       style="fill:#808080;stroke-width:1.00349"
+       id="rect16"
+       width="8"
+       height="72"
+       x="220"
+       y="212" />
+    <rect
+       style="fill:#808080;stroke-width:1.00349"
+       id="rect16-9"
+       width="8"
+       height="72"
+       x="244"
+       y="212" />
+    <rect
+       style="fill:#808080;stroke-width:1.00349"
+       id="rect16-9-8"
+       width="8"
+       height="72"
+       x="268"
+       y="212" />
+    <rect
+       style="fill:#808080;stroke-width:0.866025"
+       id="rect18"
+       width="16"
+       height="12"
+       x="216"
+       y="264" />
+    <rect
+       style="fill:#808080;stroke-width:0.866025"
+       id="rect18-5"
+       width="16"
+       height="12"
+       x="240"
+       y="224" />
+    <rect
+       style="fill:#808080;stroke-width:0.866025"
+       id="rect18-56"
+       width="16"
+       height="12"
+       x="264"
+       y="248" />
+    <rect
+       style="fill:none;stroke-width:0.979796"
+       id="rect19"
+       width="96"
+       height="96"
+       x="200"
+       y="200" />
+  </g>
+</svg>

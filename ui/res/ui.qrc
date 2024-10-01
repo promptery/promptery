@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="play">play.svg</file>
+        <file alias="stop">stop.svg</file>
+        <file alias="cancel">cancel.svg</file>
+        <file>robot.svg</file>
+        <file>chat.svg</file>
+        <file>content.svg</file>
+        <file>folder-add.svg</file>
+        <file>page-add.svg</file>
+        <file>open.svg</file>
+        <file>decorator-prompt.svg</file>
+        <file>system-prompt.svg</file>
+        <file>settings.svg</file>
+    </qresource>
+</RCC>

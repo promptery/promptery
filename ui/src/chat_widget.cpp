@@ -35,7 +35,7 @@
 #include <QLabel>
 #include <QNetworkReply>
 #include <QRegularExpression>
-#include <QScrollbar>
+#include <QScrollBar>
 #include <QStandardPaths>
 #include <QStyleHints>
 #include <QTextEdit>

@@ -36,8 +36,8 @@ private:
 
     ContentModel *m_contentModel;
 
-    TextView *m_textEdit;
-    TextView *m_contextView;
+    TextView *m_textEdit{ nullptr };
+    TextView *m_contextView{ nullptr };
     QVBoxLayout *m_layout;
     ContextFiles m_contextFiles;
     ContextPages m_contextPages;

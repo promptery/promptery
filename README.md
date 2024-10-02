@@ -1,3 +1,7 @@
+<div align="center">
+  <img alt="Promperty" src="packaging/icon.svg" width="200" />
+</div>
+
 # Promptery
 
 Promptery is a cross-platform (Linux, Mac, Windows) frontend for

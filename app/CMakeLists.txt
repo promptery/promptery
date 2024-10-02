@@ -97,12 +97,18 @@ if(APPLE)
                 )
             endforeach()
 
+            add_custom_target(RemoveDmg
+                COMMAND ${CMAKE_COMMAND} -E remove -f
+                        "${CMAKE_CURRENT_BINARY_DIR}/Promptery.dmg"
+                DEPENDS ${PROJECT_NAME}
+            )
+
             # run appdmg and copy result
             add_custom_target(Dmg ALL
                 COMMAND "${APPDMG_EXECUTABLE}" "mac_dmg.json" "Promptery.dmg"
                 WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
                 COMMENT "Package app"
-                DEPENDS ${PROJECT_NAME}
+                DEPENDS RemoveDmg
             )
             add_custom_command(TARGET Dmg POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy

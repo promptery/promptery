@@ -55,7 +55,7 @@ cmake --build .  # -j <job count> for parallel build
 
 ### Run
 
-Make sure that Ollama is serving and reachable on your machine. Start Promptery afterwards.
+Make sure that Ollama is reachable on your machine and serving at least one model. Start Promptery afterwards.
 
 ## Contributing
 

@@ -62,25 +62,39 @@ WorkflowWidget::WorkflowWidget(WorkflowModel *workflowModel, QWidget *parent)
 
 void WorkflowWidget::showEvent(QShowEvent *event)
 {
+    // we preselect the first entry of each combobox if needed and possible
+
     m_cmbBackend->setCurrentIndex(m_workflowModel->selectedBackendIdx());
     connect(m_cmbBackend, &QComboBox::currentIndexChanged, this, [this](int index) {
         m_workflowModel->setSelectedBackend(index);
     });
+    if (m_cmbBackend->currentIndex() == -1 && m_cmbBackend->count() > 0) {
+        m_cmbBackend->setCurrentIndex(0);
+    }
 
     m_cmbModel->setCurrentIndex(m_workflowModel->selectedModelIdx());
     connect(m_cmbModel, &QComboBox::currentIndexChanged, this, [this](int index) {
         m_workflowModel->setSelectedModelIdx(index);
     });
+    if (m_cmbModel->currentIndex() == -1 && m_cmbModel->count() > 0) {
+        m_cmbModel->setCurrentIndex(0);
+    }
 
     m_cmbDecorator->setCurrentIndex(m_workflowModel->selectedDecoratorPromptIdx());
     connect(m_cmbDecorator, &QComboBox::currentIndexChanged, this, [this](int index) {
         m_workflowModel->setSelectedDecoratorPromptIdx(index);
     });
+    if (m_cmbDecorator->currentIndex() == -1 && m_cmbDecorator->count() > 0) {
+        m_cmbDecorator->setCurrentIndex(0);
+    }
 
     m_cmbSystemPrompt->setCurrentIndex(m_workflowModel->selectedSystemPromptIdx());
     connect(m_cmbSystemPrompt, &QComboBox::currentIndexChanged, this, [this](int index) {
         m_workflowModel->setSelectedSystemPromptIdx(index);
     });
+    if (m_cmbSystemPrompt->currentIndex() == -1 && m_cmbSystemPrompt->count() > 0) {
+        m_cmbSystemPrompt->setCurrentIndex(0);
+    }
 }
 
 void WorkflowWidget::onSelectedBackendChanged()
@@ -117,5 +131,11 @@ void WorkflowWidget::modelsAvailable(const QString &backendId)
         QSignalBlocker b(m_cmbModel);
         m_cmbModel->setCurrentIndex(m_workflowModel->selectedModelIdx());
     }
+
+    // signals need to be active, if we need to set to the first model programmatically
+    if (m_cmbModel->currentIndex() == -1 && m_cmbModel->count() > 0) {
+        m_cmbModel->setCurrentIndex(0);
+    }
+
     m_cmbModel->update();
 }

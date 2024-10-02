@@ -107,7 +107,7 @@ private:
     T *m_model;
     ComboboxListAdapter *m_adapter;
     QVariant m_peristentId;
-    int m_idx;
+    int m_idx{ -1 };
 };
 
 

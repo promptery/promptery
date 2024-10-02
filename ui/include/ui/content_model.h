@@ -30,6 +30,10 @@ public:
     void readSettings() override { Base::readSettings(cId); }
     void storeSettings() const override { Base::storeSettings(cId); }
 
+protected:
+    bool emptyModelOk() const override { return true; }
+    QString newObjectName() const override { return tr("new content prompt"); }
+
 private:
     static constexpr const char *cId = "content";
 };

@@ -16,4 +16,7 @@ public:
 
     void readSettings() override { Base::readSettings("chats"); }
     void storeSettings() const override { Base::storeSettings("chats"); }
+
+protected:
+    QString newObjectName() const override { return tr("new chat"); }
 };

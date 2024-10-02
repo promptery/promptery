@@ -53,6 +53,9 @@ public:
     void readSettings() override { Base::readSettings(cId); }
     void storeSettings() const override { Base::storeSettings(cId); }
 
+protected:
+    QString newObjectName() const override { return tr("new decorator prompt"); }
+
 private:
     static constexpr const char *cId = "decoratorPrompts";
 };

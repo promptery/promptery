@@ -71,6 +71,13 @@ std::unique_ptr<QFile> settingsFile(const QString &prefix)
 
 void NamedObjectModel::readSettings(const QString &prefix)
 {
+    finally emptyGuard([this] {
+        // we always need at least one object
+        if (m_model->invisibleRootItem()->rowCount() == 0 && !emptyModelOk()) {
+            createObject(m_model->invisibleRootItem()->index());
+        }
+    });
+
     auto file = settingsFile(prefix);
     if (!file->exists()) {
         return;
@@ -180,7 +187,7 @@ QStandardItem *NamedObjectModel::createObject(const QModelIndex &parent, const Q
         return nullptr;
     }
 
-    auto item = std::make_unique<QStandardItem>(tr("new object"));
+    auto item = std::make_unique<QStandardItem>(newObjectName());
     item->setIcon(m_fileIconProvider.icon(QFileIconProvider::File));
     item->setEditable(true);
     item->setDragEnabled(true);
@@ -223,4 +230,9 @@ QJsonValue NamedObjectModel::storeItem(QStandardItem *item) const
 QStandardItem *NamedObjectModel::itemFromIndex(const QModelIndex &idx) const
 {
     return m_model->itemFromIndex(idx);
+}
+
+QString NamedObjectModel::newObjectName() const
+{
+    return tr("new object");
 }

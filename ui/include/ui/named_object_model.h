@@ -45,6 +45,9 @@ protected:
 
     QStandardItem *itemFromIndex(const QModelIndex &idx) const;
 
+    virtual bool emptyModelOk() const { return false; }
+    virtual QString newObjectName() const;
+
 private:
     WrappedStandardItemModel *m_model;
 };

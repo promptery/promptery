@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
 
     QApplication::setStyle(QStyleFactory::create("Fusion"));
     QApplication a(argc, argv);
+    a.setWindowIcon(QIcon(":/res/icon"));
 
     GlobalLogger::installGlobalLogger(a);
 

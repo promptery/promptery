@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Promptery</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="res.qrc">
+    <normaloff>:/res/icon</normaloff>:/res/icon</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="leftMargin">
@@ -62,8 +66,16 @@
     </property>
     <addaction name="actStoreWindowPosition"/>
    </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actAbout"/>
+    <addaction name="actAboutQt"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuSettings"/>
+   <addaction name="menu_Help"/>
   </widget>
   <action name="action_Quit">
    <property name="text">
@@ -86,8 +98,20 @@
     <string>Ctrl+S</string>
    </property>
   </action>
+  <action name="actAboutQt">
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+  </action>
+  <action name="actAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>action_Quit</sender>

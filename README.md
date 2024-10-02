@@ -1,5 +1,5 @@
 <div align="center">
-  <img alt="Promperty" src="packaging/icon.svg" width="200" />
+  <img alt="Promptery" src="packaging/icon.svg" width="200" />
 </div>
 
 # Promptery

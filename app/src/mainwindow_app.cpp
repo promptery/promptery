@@ -10,6 +10,7 @@
 #include <QApplication>
 #include <QComboBox>
 #include <QDesktopServices>
+#include <QMessageBox>
 #include <QScreen>
 #include <QToolBar>
 
@@ -62,6 +63,10 @@ MainWindowApp::MainWindowApp(QWidget *parent)
         ++chatCount;
     }
 
+    connect(ui->actAbout, &QAction::triggered, this, [this]() {
+        QMessageBox::about(this, tr("About Promptery"), tr("Promptery :-)"));
+    });
+    connect(ui->actAboutQt, &QAction::triggered, this, [this]() { QMessageBox::aboutQt(this); });
 
     connect(ui->actSave, &QAction::triggered, this, &MainWindowApp::storeSettings);
 

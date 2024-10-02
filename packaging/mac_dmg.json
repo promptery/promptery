@@ -1,0 +1,11 @@
+{
+    "title": "Promptery",
+    "icon": "Promptery.icns",
+    "background": "mac_dmg_bkg.png",
+    "icon-size": 80,
+    "contents": [
+        { "x": 480, "y": 400, "type": "link", "path": "/Applications" },
+        { "x": 160, "y": 400, "type": "file", "path": "Promptery.app" },
+        { "x": 480, "y": 235, "type": "link", "path": "Promptery.app/Contents/Licenses" }
+    ]
+}

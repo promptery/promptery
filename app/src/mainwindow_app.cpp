@@ -98,11 +98,10 @@ void MainWindowApp::readSettings()
         restoreState(s.value(screen + "/windowState").toByteArray());
     } else {
         const auto *const screen = QApplication::screens().at(0);
-        setGeometry(screen->geometry().adjusted(screen->geometry().width() / 8,
-                                                screen->geometry().height() / 8,
-                                                -screen->geometry().width() / 8,
-                                                -screen->geometry().height() / 8));
-        move(screen->geometry().width() / 8, screen->geometry().height() / 8);
+        setGeometry(
+            QRect(0, 0, screen->geometry().height() * 0.9, screen->geometry().height() * 0.75));
+        move((screen->geometry().width() - geometry().width()) / 2,
+             (screen->geometry().height() - geometry().height()) / 2);
     }
     m_chatMainWidget->readSettings();
 }

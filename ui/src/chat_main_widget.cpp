@@ -90,7 +90,11 @@ void ChatMainWidget::readSettings()
     auto &s = Settings::global();
     s.sync();
 
-    ui->splitMain->restoreState(s.value(ChatWidget::sName(cSplitMain)).toByteArray());
+    if (s.contains(ChatWidget::sName(cSplitMain))) {
+        ui->splitMain->restoreState(s.value(ChatWidget::sName(cSplitMain)).toByteArray());
+    } else {
+        m_settingsAvailable = false;
+    }
 
     m_decoratorPromptModel->readSettings();
     m_systemPromptModel->readSettings();
@@ -129,4 +133,16 @@ void ChatMainWidget::saveState()
         page.page->saveState();
     }
     s.sync();
+}
+
+void ChatMainWidget::showEvent(QShowEvent *event)
+{
+    QWidget::showEvent(event);
+
+    if (!m_settingsAvailable) {
+        const auto w = ui->splitMain->width();
+        const auto l = w * 2 / 9;
+        const auto r = w - l;
+        ui->splitMain->setSizes({ l, r });
+    }
 }

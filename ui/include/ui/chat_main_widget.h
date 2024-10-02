@@ -34,6 +34,9 @@ public:
     void storeSettings();
     void saveState();
 
+protected:
+    void showEvent(QShowEvent *event) override;
+
 private:
     Ui::ChatMainWidget *ui;
 
@@ -50,4 +53,6 @@ private:
     };
 
     std::vector<PageWrapper> m_pages;
+
+    bool m_settingsAvailable{ true };
 };

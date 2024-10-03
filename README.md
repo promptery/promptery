@@ -8,22 +8,38 @@ Promptery is a cross-platform (Linux, Mac, Windows) frontend for
 [Ollama](https://github.com/ollama/ollama), designed to provide flexible prompt
 and context settings during chat interactions with AI models.
 
+
 ## Features
 
-- **Multiple Chat Management**: Seamlessly switch between multiple chat sessions
-  to keep track of different conversations simultaneously.
-- **System Prompts**: Configure system prompts to guide the AI's behavior and
-  tailor responses to specific needs.
-- **Content Pages**: Add and manage content pages that can be referenced during
-  conversations, providing contextual information for the AI.
-- **Decorator Prompts**: Enhance your chat experience by applying decorator
-  prompts to customize how the AI presents its responses.
-- **External Files Integration**: Easily incorporate external text files into
-  chats to expand the AI's knowledge base and contextual understanding.
-- **Dynamic Model Switching**: Change the chat model mid-conversation without
-  losing context, enabling flexible and adaptive interactions with the AI.
-- **Context Customization**: Enable, disable, or rerun former messages to tailor
-  the conversation context.
+- **Multiple Chat Management**: Switch between multiple chat sessions effortlessly.
+- **System Prompts**: Configure prompts to guide the AI's behavior.
+- **Content Pages**: Manage content pages for referencing during conversations.
+- **Decorator Prompts**: Customize how the AI presents its responses.
+- **External Files Integration**: Incorporate external text files into chats.
+- **Dynamic Model Switching**: Change models mid-conversation without losing context.
+- **Context Customization**: Tailor conversation context by enabling, disabling, or rerunning former messages.
+
+### Screenshots
+
+<div style="display: flex;">
+  <div style="width: 50%; box-sizing: border-box;" align="center">
+    <a href="doc/screenshots/First start.png">
+      <img alt="Promptery - First Start" src="doc/screenshots/First start.png" width="300"/>
+    </a>
+    <div style="width: 400px;">
+    <b>First Start:</b> Promptery's initial user interface upon first launch.
+    </div>
+  </div>
+
+  <div style="width: 50%; box-sizing: border-box;" align="center">
+    <a href="doc/screenshots/Role play with external file.png">
+      <img alt="Promptery - Roleplay Example" src="doc/screenshots/Role play with external file.png" width="300"/>
+    </a>
+    <div style="width: 400px;">
+    <b>Roleplay Example:</b> Demonstrating a roleplay scenario with characters like a pirate, butler, and coding assistant using an external file for additional context.
+    </div>
+  </div>
+</div>
 
 ### Outlook
 
@@ -33,6 +49,15 @@ and context settings during chat interactions with AI models.
 - Tool usage
 - Markdown rendering
 - Writing external files
+
+
+## Development Status
+
+Promptery is a hobby project in its early stages. It is not ready for production
+and may lose stored data. Expect bugs and lacking error handling. Save and
+backup regularly. Currently all user data is stored in a settings directory that
+adheres to your platform's standard location for such files.
+
 
 ## Build and Run
 
@@ -55,15 +80,14 @@ cmake --build .  # -j <job count> for parallel build
 
 ### Run
 
-Make sure that Ollama is reachable on your machine and serving at least one model. Start Promptery afterwards.
+Ensure Ollama is reachable and serving at least one model. Start Promptery afterwards.
+
 
 ## Contributing
 
-Community contributions are very welcome, especially in the areas of testing and
-packaging.
+Community contributions are welcome, especially in testing and packaging. Contribute via issues and pull requests.
 
-You can contribute via issues and pull requests (PRs).
 
 ## License
 
-Promptery is licensed under the [GPL 3.0](LICENSE) license.
+Promptery is licensed under the [GPL-3.0](LICENSE) license.

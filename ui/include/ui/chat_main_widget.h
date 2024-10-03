@@ -10,6 +10,7 @@ class BackendManager;
 class ChatModel;
 class ContentModel;
 class DecoratorPromptModel;
+class SettingsWidget;
 class SystemPromptModel;
 class WorkflowModel;
 
@@ -31,6 +32,8 @@ public:
     void setCurrentIndex(int pageIdx);
 
     void readSettings();
+    void initialize(); // should be called after readSettings
+
     void storeSettings();
     void saveState();
 
@@ -46,6 +49,8 @@ private:
     DecoratorPromptModel *m_decoratorPromptModel;
     SystemPromptModel *m_systemPromptModel;
     WorkflowModel *m_workflowModel;
+
+    SettingsWidget *m_settingWidget;
 
     struct PageWrapper {
         PageInterface *page{ nullptr };

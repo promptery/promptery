@@ -74,6 +74,7 @@ MainWindowApp::MainWindowApp(QWidget *parent)
         ui->actStoreWindowPosition, &QAction::triggered, this, &MainWindowApp::storeWindowSettings);
 
     readSettings();
+    m_chatMainWidget->initialize();
 }
 
 MainWindowApp::~MainWindowApp()

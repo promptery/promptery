@@ -1,13 +1,13 @@
 set(LIB_SOURCES
     include/model/backend_manager.h
-    include/model/dummy_llm_backend.h
+    include/model/internal_llm_backend.h
     include/model/llm_interface.h
     include/model/ollama_config.h
     include/model/ollama_interface.h
     include/model/types.h
 
     src/backend_manager.cpp
-    src/dummy_llm_backend.cpp
+    src/internal_llm_backend.cpp
     src/ollama_config.cpp
     src/ollama_interface.cpp
 )

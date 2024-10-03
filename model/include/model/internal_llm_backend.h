@@ -2,13 +2,13 @@
 
 #include <model/llm_interface.h>
 
-class DummyLlmBackend : public LlmInterface
+class InternalLlmBackend : public LlmInterface
 {
 public:
-    explicit DummyLlmBackend(QObject *parent = nullptr);
+    explicit InternalLlmBackend(QObject *parent = nullptr);
 
-    QString id() const override { return "dummy"; }
-    QString name() const override { return "Dummy backend"; }
+    QString id() const override { return "internal"; }
+    QString name() const override { return "Debug backend"; }
 
     QIODevice *asyncChat(QString &&model, QJsonArray &&messages) override;
     QIODevice *asyncEmbed(QString && /*model*/, QString && /*text*/) override { return nullptr; }

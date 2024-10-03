@@ -7,7 +7,7 @@ class OllamaInterface : public LlmInterface
 public:
     explicit OllamaInterface(QObject *parent = nullptr);
 
-    QString id() const override { return "ollama"; }
+    QString id() const override;
     QString name() const override { return "Ollama backend"; }
 
     bool isDefaultLlm() const override { return true; }

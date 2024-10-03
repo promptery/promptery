@@ -33,7 +33,10 @@ public:
     virtual bool isDefaultLlm() const { return false; }
 
     void updateModels() { fetchModels(); }
+
+    Q_SIGNAL void startingConnection(const QString &backendId) const;
     Q_SIGNAL void modelsAvailable(const QString &backendId) const;
+
     const std::vector<ModelInformation> models() const
     {
         std::lock_guard<std::mutex> lock(m_mutex);

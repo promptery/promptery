@@ -1,4 +1,4 @@
-#include <model/dummy_llm_backend.h>
+#include <model/internal_llm_backend.h>
 
 #include <QIODevice>
 #include <QJsonArray>
@@ -6,7 +6,7 @@
 #include <QJsonObject>
 #include <QTimer>
 
-constexpr auto cMirror = "dummy_mirror";
+constexpr auto cMirror = "internal_mirror";
 
 class AsyncString : public QIODevice
 {
@@ -49,7 +49,7 @@ protected:
 
         if (m_finish) {
             static const auto finalRresponse = QString(R"({
-  "model": "dummy_mirror",
+  "model": "internal_mirror",
   "created_at": "%1",
   "done": true,
   "total_duration": 42,
@@ -67,7 +67,7 @@ protected:
         }
 
         static const auto response = QString(R"({
-  "model": "dummy_mirror",
+  "model": "internal_mirror",
   "created_at": "%1",
   "message": %2,
   "done": false
@@ -147,12 +147,12 @@ private:
 
 //------------------------------------------------
 
-DummyLlmBackend::DummyLlmBackend(QObject *parent)
+InternalLlmBackend::InternalLlmBackend(QObject *parent)
     : LlmInterface(parent)
 {
 }
 
-QIODevice *DummyLlmBackend::asyncChat(QString &&model, QJsonArray &&messages)
+QIODevice *InternalLlmBackend::asyncChat(QString &&model, QJsonArray &&messages)
 {
     if ((model == cMirror) && !messages.isEmpty()) {
         auto str = messages.at(messages.count() - 1).toObject()["content"].toString();
@@ -162,7 +162,7 @@ QIODevice *DummyLlmBackend::asyncChat(QString &&model, QJsonArray &&messages)
     return nullptr;
 }
 
-void DummyLlmBackend::fetchModels()
+void InternalLlmBackend::fetchModels()
 {
     setModels({ { cMirror, "Mirror", ModelType::chat } });
     Q_EMIT modelsAvailable(id());

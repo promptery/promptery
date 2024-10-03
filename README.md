@@ -49,7 +49,7 @@ cd promptery
 mkdir build
 cd build
 
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .  # -j <job count> for parallel build
 ```
 

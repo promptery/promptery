@@ -15,6 +15,11 @@ OllamaInterface::OllamaInterface(QObject *parent)
 {
 }
 
+QString OllamaInterface::id() const
+{
+    return OllamaConfig::backendId();
+}
+
 QIODevice *OllamaInterface::asyncChat(QString &&model, QJsonArray &&messages)
 {
     QJsonObject json{ { "model", std::move(model) }, { "messages", std::move(messages) } };
@@ -34,6 +39,11 @@ void OllamaInterface::fetchModels()
     if (m_modelsReply) {
         m_modelsReply->deleteLater();
     }
+    if (!models().empty()) {
+        setModels({});
+        Q_EMIT modelsAvailable(id());
+    }
+    Q_EMIT startingConnection(id());
     m_modelsReply = Downloader::global().getAsync(OllamaConfig::global().serverAddr("tags"));
     connect(m_modelsReply, &QNetworkReply::readyRead, this, [this]() {
         std::vector<ModelInformation> models;

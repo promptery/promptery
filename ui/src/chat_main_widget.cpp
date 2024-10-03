@@ -28,14 +28,14 @@ ChatMainWidget::ChatMainWidget(QWidget *parent)
     , m_systemPromptModel(new SystemPromptModel(this))
     , m_workflowModel(
           new WorkflowModel(m_backends, m_decoratorPromptModel, m_systemPromptModel, this))
+    , m_settingWidget(new SettingsWidget(m_backends, this))
     , m_pages({ { new ChatWidget(m_chatModel, m_contentModel, m_workflowModel, this), nullptr },
                 { new ContentWidget(m_contentModel, this), nullptr },
                 { new SystemPromptWidget(m_systemPromptModel, this), nullptr },
                 { new DecoratorPromptWidget(m_decoratorPromptModel, this), nullptr },
-                { new SettingsWidget(this), nullptr } })
+                { m_settingWidget, nullptr } })
 {
     ui->setupUi(this);
-    m_backends->initialize();
 
     for (auto &page : m_pages) {
         if (page.page->sideView()) {
@@ -102,9 +102,16 @@ void ChatMainWidget::readSettings()
     m_contentModel->readSettings();
     m_chatModel->readSettings();
 
+    m_settingWidget->readSettings();
+
     for (auto &page : m_pages) {
         page.page->readSettings();
     }
+}
+
+void ChatMainWidget::initialize()
+{
+    m_backends->initialize();
 }
 
 void ChatMainWidget::storeSettings()
@@ -118,6 +125,8 @@ void ChatMainWidget::storeSettings()
     m_workflowModel->storeSettings();
     m_contentModel->storeSettings();
     m_chatModel->storeSettings();
+
+    m_settingWidget->storeSettings();
 
     for (const auto &page : m_pages) {
         page.page->storeSettings();

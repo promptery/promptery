@@ -1,5 +1,3 @@
-project(Promptery VERSION 0.1 LANGUAGES CXX)
-
 set(PROJECT_SOURCES
     src/main_app.cpp
     src/mainwindow_app.cpp
@@ -36,6 +34,7 @@ else()
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ui)
+target_compile_definitions(${PROJECT_NAME} PRIVATE VERSION="${CMAKE_PROJECT_VERSION}")
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
@@ -113,7 +112,7 @@ if(APPLE)
             add_custom_command(TARGET Dmg POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                         "${CMAKE_CURRENT_BINARY_DIR}/Promptery.dmg"
-                        "${CMAKE_CURRENT_BINARY_DIR}/../Promptery.dmg"
+                        "${CMAKE_CURRENT_BINARY_DIR}/../Promptery-${CMAKE_PROJECT_VERSION}.dmg"
             )
         endif()
     endif()

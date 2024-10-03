@@ -64,7 +64,8 @@ MainWindowApp::MainWindowApp(QWidget *parent)
     }
 
     connect(ui->actAbout, &QAction::triggered, this, [this]() {
-        QMessageBox::about(this, tr("About Promptery"), tr("Promptery :-)"));
+        QString version(VERSION);
+        QMessageBox::about(this, tr("About Promptery"), tr("Promptery version %1").arg(version));
     });
     connect(ui->actAboutQt, &QAction::triggered, this, [this]() { QMessageBox::aboutQt(this); });
 

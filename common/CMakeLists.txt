@@ -1,6 +1,5 @@
 set(LIB_SOURCES
     include/common/downloader.h
-    include/common/job.h
     include/common/log.h
     include/common/settings.h
     include/common/tree_to_list_model_adapter.h
@@ -10,7 +9,6 @@ set(LIB_SOURCES
     include/tools/tools.h
 
     src/downloader.cpp
-    src/job.cpp
     src/tree_to_list_model_adapter.cpp
 )
 

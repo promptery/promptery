@@ -1,4 +1,4 @@
-#include <model/types.h>
+#include <model/chat_types.h>
 
 #include <QWidget>
 

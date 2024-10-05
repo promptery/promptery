@@ -7,6 +7,7 @@
 
 #include <vector>
 
+class LlmInterface;
 struct ContextFiles {
     QString rootPath;
     std::vector<QString> files;
@@ -108,4 +109,85 @@ struct ChatData {
 private:
     std::vector<Interaction> m_interactions;
     int m_scroll;
+};
+
+struct SystemPromptData {
+    SystemPromptData() = default;
+    SystemPromptData(QString prompt, QString comment)
+        : m_prompt(std::move(prompt))
+        , m_comment(std::move(comment))
+    {
+    }
+
+    SystemPromptData(const QJsonValue &json)
+    {
+        auto obj  = json.toObject();
+        m_prompt  = obj["prompt"].toString();
+        m_comment = obj["comment"].toString();
+    }
+    QJsonValue toJson() const
+    {
+        return QJsonObject{ { "prompt", m_prompt }, { "comment", m_comment } };
+    }
+
+    QString systemPrompt() const { return m_prompt; }
+    QString comment() const { return m_comment; }
+
+private:
+    QString m_prompt;
+    QString m_comment;
+};
+
+struct DecoratorPromptData {
+    DecoratorPromptData() = default;
+    DecoratorPromptData(QString before, QString after, QString comment)
+        : m_before(std::move(before))
+        , m_after(std::move(after))
+        , m_comment(std::move(comment))
+    {
+    }
+
+    DecoratorPromptData(const QJsonValue &json)
+    {
+        auto obj  = json.toObject();
+        m_before  = obj["before"].toString();
+        m_after   = obj["after"].toString();
+        m_comment = obj["comment"].toString();
+    }
+    QJsonValue toJson() const
+    {
+        return QJsonObject{ { "before", m_before },
+                            { "after", m_after },
+                            { "comment", m_comment } };
+    }
+
+    QString decoratorBefore() const { return m_before; }
+    QString decoratorAfter() const { return m_after; }
+    QString comment() const { return m_comment; }
+
+private:
+    QString m_before;
+    QString m_after;
+    QString m_comment;
+};
+
+struct ChatRequest {
+    QString title; // the name of the workflow step
+    LlmInterface *backend;
+    QString model;
+    QJsonArray ollamaMessages;
+};
+
+struct ChatResponse {
+    QString response;
+};
+
+class WorkflowInterface
+{
+public:
+    virtual ~WorkflowInterface() = default;
+
+    virtual bool hasNext() const                      = 0;
+    virtual ChatRequest nextRequest()                 = 0;
+    virtual void finishRequest(ChatResponse response) = 0;
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <model/types.h>
+#include <model/chat_types.h>
 
 #include <ui/page_interface.h>
 #include <ui/system_prompt_model.h>
@@ -23,9 +23,12 @@ class TabView;
 class WorkflowModel;
 class WorkflowWidget;
 
-class QToolBar;
+class QNetworkReply;
 class QPushButton;
+class QToolBar;
 
+
+class WorkflowProcessor;
 namespace Ui
 {
 class ChatWidget;
@@ -65,7 +68,7 @@ public:
     TileChildData data() const override;
     std::vector<QWidget *> actionWidgetsRight() override;
 
-    Q_SLOT void save_todo();
+    Q_SLOT void exportChat();
 
     static QString sName(const char *prop);
 
@@ -80,8 +83,6 @@ private:
     Q_SLOT void btnGoClicked();
     Q_SLOT void btnClearInputClicked();
     Q_SLOT void abortReply();
-
-    Q_SLOT void readyRead();
     Q_SLOT void modelsAvailable(const QString &backendId);
 
     // model connection
@@ -100,11 +101,15 @@ private:
     void setScrollSpacerToIdealheight();
 
     bool
-    startQuery(QString query, const ContextFiles &contextFiles, const ContextPages &contextPages);
+    startQuery(QString query, ContextFiles contextFiles, ContextPages contextPages);
 
     QJsonArray chatAsJson(bool forSaving) const;
 
-    bool asyncChat(QString model, QJsonArray messages);
+
+    Q_SLOT void procBeginBlock(int index, const QString &title);
+    Q_SLOT void procEndBlock(int index);
+    Q_SLOT void procNewContent(const QString &content);
+    Q_SLOT void procFinished();
 
     Ui::ChatWidget *ui;
     QPushButton *m_btnGo;
@@ -128,7 +133,7 @@ private:
     FileSystemModel *m_fileModel;
     EnhancedTreeView *m_fileTree;
 
-    QIODevice *m_reply{ nullptr };
+    WorkflowProcessor *m_processor;
 
     std::vector<ChatItemWidget *> m_queries;
     ChatItemWidget *m_current{ nullptr };

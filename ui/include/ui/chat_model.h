@@ -3,7 +3,7 @@
 #include <ui/model_interface.h>
 #include <ui/named_object_model.h>
 
-#include <model/types.h>
+#include <model/chat_types.h>
 
 class ChatModel : public NamedObjectModelWithData<ChatData>, public ModelInterface
 {

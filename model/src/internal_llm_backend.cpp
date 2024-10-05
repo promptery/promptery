@@ -1,18 +1,18 @@
 #include <model/internal_llm_backend.h>
 
-#include <QIODevice>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QNetworkReply>
 #include <QTimer>
 
 constexpr auto cMirror = "internal_mirror";
 
-class AsyncString : public QIODevice
+class AsyncString : public QNetworkReply
 {
 public:
     explicit AsyncString(QString str, QObject *parent = nullptr)
-        : QIODevice(parent)
+        : QNetworkReply(parent)
         , m_timer(new QTimer(this))
         , m_data(std::move(str))
     {
@@ -33,7 +33,13 @@ public:
         }
 
         prepareNext();
-        return m_next.size() + QIODevice::bytesAvailable();
+        return m_next.size() + QNetworkReply::bytesAvailable();
+    }
+
+    Q_SLOT void abort() override
+    {
+        m_timer->stop();
+        Q_EMIT finished();
     }
 
 protected:
@@ -152,7 +158,7 @@ InternalLlmBackend::InternalLlmBackend(QObject *parent)
 {
 }
 
-QIODevice *InternalLlmBackend::asyncChat(QString &&model, QJsonArray &&messages)
+QNetworkReply *InternalLlmBackend::asyncChat(QString &&model, QJsonArray &&messages)
 {
     if ((model == cMirror) && !messages.isEmpty()) {
         auto str = messages.at(messages.count() - 1).toObject()["content"].toString();

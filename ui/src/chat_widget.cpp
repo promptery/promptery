@@ -19,6 +19,8 @@
 
 #include <model/backend_manager.h>
 #include <model/llm_interface.h>
+#include <model/workflow_basic.h>
+#include <model/workflow_processor.h>
 
 #include <common/log.h>
 #include <common/settings.h>
@@ -128,6 +130,7 @@ ChatWidget::ChatWidget(ChatModel *chatModel,
     , m_contentTree(new EnhancedTreeView(m_additionalContentModel, this))
     , m_fileModel(new FileSystemModel(this))
     , m_fileTree(new EnhancedTreeView(m_fileModel, this))
+    , m_processor(new WorkflowProcessor(this))
 {
     ui->setupUi(this);
     ui->frmInput->setBackgroundRole(QPalette::Base);
@@ -167,6 +170,11 @@ ChatWidget::ChatWidget(ChatModel *chatModel,
     connect(&m_scrollTimer, &QTimer::timeout, this, &ChatWidget::updateScroll);
 
     connect(m_workflowModel, &WorkflowModel::modelsAvailable, this, &ChatWidget::modelsAvailable);
+
+    connect(m_processor, &WorkflowProcessor::beginBlock, this, &ChatWidget::procBeginBlock);
+    connect(m_processor, &WorkflowProcessor::endBlock, this, &ChatWidget::procEndBlock);
+    connect(m_processor, &WorkflowProcessor::newContent, this, &ChatWidget::procNewContent);
+    connect(m_processor, &WorkflowProcessor::finished, this, &ChatWidget::procFinished);
 
     ui->edtInput->installEventFilter(this);
     ui->outputArea->installEventFilter(this);
@@ -254,7 +262,7 @@ std::vector<QWidget *> ChatWidget::actionWidgetsRight()
     return { btnClear };
 }
 
-void ChatWidget::save_todo()
+void ChatWidget::exportChat()
 {
     static const auto filters = tr("Chat files (*.json);;All files (*.*)");
 
@@ -337,105 +345,60 @@ void ChatWidget::btnGoClicked()
         return;
     }
 
-    if (m_reply) {
-        abortReply();
+    if (m_processor->isActive()) {
+        m_processor->stop();
         return;
     }
 
-    const auto text = ui->edtInput->toPlainText().trimmed();
+    auto text = ui->edtInput->toPlainText().trimmed();
     if (text.trimmed().isEmpty()) {
         ui->edtInput->clear();
         btnGoShowPlay();
         return;
     }
 
+    m_inputHistory.push_back(text);
+    m_currentInputIdx = m_inputHistory.size();
+
+    if (!m_current) {
+        setCurrent(createNewItem(-1));
+    } else {
+        m_current->clearOutput();
+    }
+
     auto files = m_fileModel->contextFiles();
     auto pages = m_additionalContentModel->contextPages();
-    if (startQuery(text, files, pages)) {
+
+    ui->edtInput->clear();
+    m_current->setInput(text);
+    m_current->setInputContext(std::move(files), std::move(pages));
+    writeTextToModel();
+
+    QMetaObject::invokeMethod(
+        this,
+        [this]() {
+            m_scrollTarget = std::max(0, m_current->geometry().y() - 50);
+            m_scrollTimer.start(10);
+        },
+        Qt::QueuedConnection);
+
+    if (startQuery(text, std::move(files), std::move(pages))) {
         btnGoShowStop();
-        m_inputHistory.push_back(text);
-        m_currentInputIdx = m_inputHistory.size();
-
-        if (!m_current) {
-            setCurrent(createNewItem(-1));
-        } else {
-            m_current->clearOutput();
-        }
-
-        ui->edtInput->clear();
-        m_current->setInput(text);
-        m_current->setInputContext(std::move(files), std::move(pages));
-        writeTextToModel();
-
-        QMetaObject::invokeMethod(
-            this,
-            [this]() {
-                m_scrollTarget = std::max(0, m_current->geometry().y() - 50);
-                m_scrollTimer.start(10);
-            },
-            Qt::QueuedConnection);
     }
 }
 
 void ChatWidget::btnClearInputClicked()
 {
     ui->edtInput->clear();
-    if (!m_reply) {
+    if (!m_processor->isActive()) {
         setCurrent(nullptr);
     }
 }
 
 void ChatWidget::abortReply()
 {
-    if (m_reply) {
+    if (m_processor->isActive()) {
         cleanReply();
-    }
-}
-
-void ChatWidget::readyRead()
-{
-    const auto text = m_reply->readAll();
-    const auto doc  = QJsonDocument::fromJson(text);
-    if (doc.isNull()) {
-        logMessage("Could not decode JSON from server response.");
-        return;
-    }
-    if (m_current) {
-        // final response
-        if (doc.isObject() && doc.object()["done"].toBool()) {
-            cleanReply();
-            /*{
-              "model": "llama3",
-              "created_at": "2023-08-04T19:22:45.499127Z",
-              "done": true,
-              "total_duration": 4883583458,
-              "load_duration": 1334875,
-              "prompt_eval_count": 26,
-              "prompt_eval_duration": 342546000,
-              "eval_count": 282,
-              "eval_duration": 4535599000
-            }*/
-
-            const auto model         = doc.object().value("model").toString();
-            const auto promptCount   = doc.object().value("prompt_eval_count").toInt();
-            const auto responseCount = doc.object().value("eval_count").toInt();
-            Q_EMIT logMessage(QString("Model: %3. Token count: query: %1, response: %2.")
-                                  .arg(promptCount)
-                                  .arg(responseCount)
-                                  .arg(model));
-            setScrollSpacerToIdealheight();
-        } else if (doc.isObject() && doc.object()["message"].isObject()) {
-            const auto content   = doc.object()["message"].toObject()["content"].toString();
-            const int diff       = m_current->insertOutput(content);
-            const auto newHeight = ui->scrollSpacer->geometry().height() - diff;
-            if (newHeight < 50) { // magic number 50
-                setScrollSpacerToIdealheight();
-            } else {
-                ui->scrollSpacer->changeSize(
-                    0, newHeight, QSizePolicy::Minimum, QSizePolicy::Fixed);
-                ui->scrollContent->layout()->invalidate();
-            }
-        }
     }
 }
 
@@ -494,6 +457,7 @@ ChatItemWidget *ChatWidget::createNewItem(int index)
     connect(ptr, &ChatItemWidget::remove, this, [this, instance = ptr]() {
         if (m_current == instance) {
             abortReply();
+            m_current = nullptr;
         }
         const auto it = std::find(m_queries.begin(), m_queries.end(), instance);
         if (it != m_queries.end()) {
@@ -561,10 +525,7 @@ void ChatWidget::setCurrent(ChatItemWidget *current)
 void ChatWidget::cleanReply()
 {
     writeTextToModel();
-    if (m_reply) {
-        m_reply->deleteLater();
-    }
-    m_reply = nullptr;
+    m_processor->stop();
     btnGoShowPlay();
     // the current is stored in m_queries, we just reset the current pointer
     setCurrent(nullptr);
@@ -608,66 +569,30 @@ void ChatWidget::setScrollSpacerToIdealheight()
         Qt::QueuedConnection);
 }
 
-bool ChatWidget::startQuery(QString query,
-                            const ContextFiles &contextFiles,
-                            const ContextPages &contextPages)
+bool ChatWidget::startQuery(QString query, ContextFiles contextFiles, ContextPages contextPages)
 {
-    btnGoShowStop();
-
-    // decorator prompt
-    const auto decoratorPrompt = m_workflowModel->selectedDecoratorPrompt();
-    const auto before          = decoratorPrompt.decoratorBefore();
-    if (!before.isEmpty()) {
-        query = before + "\n" + query;
-    }
-    const auto after = decoratorPrompt.decoratorAfter();
-    if (!after.isEmpty()) {
-        query += "\n" + after;
-    }
-
-    // add context pages
-    if (!contextPages.empty()) {
-        for (const auto &id : contextPages.ids) {
-            const auto data = m_contentModel->data(id, cDataRole);
-            const auto name = m_contentModel->data(id, Qt::DisplayRole);
-            if (data.isValid() && name.isValid()) {
-                auto content =
-                    QString("Additional context\nName: '%1'\n====\n").arg(name.toString());
-                content += data.toString();
-                content += "\n====\n\n";
-                query = content + query;
-            } else {
-                Q_EMIT logMessage(tr("Could not read content for key '%1'").arg(id.toString()));
-            }
+    ChatData chat{};
+    for (auto it = m_queries.begin(); it != m_queries.end(); ++it) {
+        // only take all entries until current, needed fro "repeat"
+        if (*it == m_current) {
+            break;
         }
-    }
-    // end add context pages
-
-    // load file context
-    if (!contextFiles.empty()) {
-        for (const auto &f : contextFiles.files) {
-            QFile file(contextFiles.rootPath + "/" + f);
-            if (file.open(QIODeviceBase::ReadOnly)) {
-                auto content = QString("Additional context\nUri: '%1'\n====\n").arg(f);
-                content += QString::fromLocal8Bit(file.readAll());
-                content += "\n====\n\n";
-                query = content + query;
-            } else {
-                Q_EMIT logMessage(tr("Could not open file '%1'").arg(file.fileName()));
-            }
+        auto data = (*it)->itemData();
+        if (!data.enabled) {
+            continue;
         }
+        chat.addInteraction(std::move(data));
     }
-    // end load file context
-
-    if (!contextFiles.empty() || !contextPages.empty()) {
-        query = "Consider the following context(s).\n\n" + query;
-    }
-
-    auto json = chatAsJson(false);
-    json.append(QJsonObject{ { "role", "user" }, { "content", query } });
-
-    return asyncChat(m_workflowModel->modelId(m_workflowModel->selectedModelIdx()),
-                     std::move(json));
+    return m_processor->start(std::make_unique<WorkflowBasicWithSteps>(
+        m_workflowModel->selectedBackend().value(), // Todo: remove optional!
+        m_contentModel->itemModel(),
+        m_workflowModel->modelId(m_workflowModel->selectedModelIdx()),
+        std::move(query),
+        std::move(contextFiles),
+        std::move(contextPages),
+        std::move(chat),
+        m_workflowModel->selectedSystemPrompt(),
+        m_workflowModel->selectedDecoratorPrompt()));
 }
 
 QJsonArray ChatWidget::chatAsJson(bool forSaving) const
@@ -698,12 +623,31 @@ QJsonArray ChatWidget::chatAsJson(bool forSaving) const
     return json;
 }
 
-bool ChatWidget::asyncChat(QString model, QJsonArray messages)
+void ChatWidget::procBeginBlock(int index, const QString &title)
 {
-    if (const auto &backend = m_workflowModel->selectedBackend()) {
-        m_reply = backend.value()->asyncChat(std::move(model), std::move(messages));
-        connect(m_reply, &QNetworkReply::readyRead, this, &ChatWidget::readyRead);
-        return true;
+    procNewContent(tr("==== %1 : %2 ====\n").arg(index).arg(title));
+}
+
+void ChatWidget::procEndBlock(int index)
+{
+    procNewContent(tr("\n==== ~%1 ====\n\n").arg(index));
+}
+
+void ChatWidget::procNewContent(const QString &content)
+{
+    const int diff       = m_current->insertOutput(content);
+    const auto newHeight = ui->scrollSpacer->geometry().height() - diff;
+    if (newHeight < 50) { // magic number 50
+        setScrollSpacerToIdealheight();
+    } else {
+        ui->scrollSpacer->changeSize(0, newHeight, QSizePolicy::Minimum, QSizePolicy::Fixed);
+        ui->scrollContent->layout()->invalidate();
     }
-    return false;
+}
+
+void ChatWidget::procFinished()
+{
+    cleanReply();
+
+    setScrollSpacerToIdealheight();
 }

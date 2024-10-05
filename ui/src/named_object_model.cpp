@@ -54,12 +54,7 @@ QVariant NamedObjectModel::uuid(const QModelIndex &index) const
 
 QVariant NamedObjectModel::data(const QVariant &uuid, int role) const
 {
-    const auto ids = m_model->match(
-        m_model->index(0, 0), cUuidRole, uuid, Qt::MatchExactly | Qt::MatchRecursive);
-    if (ids.empty()) {
-        return QVariant();
-    }
-    return ids[0].data(role);
+    return dataAdapter(m_model, uuid, role);
 }
 
 std::unique_ptr<QFile> settingsFile(const QString &prefix)

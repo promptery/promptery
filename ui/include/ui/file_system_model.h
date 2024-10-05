@@ -2,7 +2,7 @@
 
 #include <ui/enhanced_treemodel.h>
 
-#include <model/types.h>
+#include <model/chat_types.h>
 
 class QAction;
 class QStandardItemModel;

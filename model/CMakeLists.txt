@@ -1,15 +1,20 @@
 set(LIB_SOURCES
     include/model/backend_manager.h
+    include/model/chat_types.h
+    include/model/defines.h
     include/model/internal_llm_backend.h
     include/model/llm_interface.h
     include/model/ollama_config.h
     include/model/ollama_interface.h
-    include/model/types.h
+    include/model/workflow_basic.h
+    include/model/workflow_processor.h
 
     src/backend_manager.cpp
     src/internal_llm_backend.cpp
     src/ollama_config.cpp
     src/ollama_interface.cpp
+    src/workflow_basic.cpp
+    src/workflow_processor.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

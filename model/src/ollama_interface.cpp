@@ -20,14 +20,14 @@ QString OllamaInterface::id() const
     return OllamaConfig::backendId();
 }
 
-QIODevice *OllamaInterface::asyncChat(QString &&model, QJsonArray &&messages)
+QNetworkReply *OllamaInterface::asyncChat(QString &&model, QJsonArray &&messages)
 {
     QJsonObject json{ { "model", std::move(model) }, { "messages", std::move(messages) } };
     return Downloader::global().postAsync(OllamaConfig::global().serverAddr("chat"),
                                           QJsonDocument(json));
 }
 
-QIODevice *OllamaInterface::asyncEmbed(QString &&model, QString &&text)
+QNetworkReply *OllamaInterface::asyncEmbed(QString &&model, QString &&text)
 {
     QJsonObject json{ { "model", std::move(model) }, { "prompt", std::move(text) } };
     return Downloader::global().postAsync(OllamaConfig::global().serverAddr("embeddings"),

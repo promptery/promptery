@@ -12,8 +12,8 @@ public:
 
     bool isDefaultLlm() const override { return true; }
 
-    QIODevice *asyncChat(QString &&model, QJsonArray &&messages) override;
-    QIODevice *asyncEmbed(QString &&model, QString &&text) override;
+    QNetworkReply *asyncChat(QString &&model, QJsonArray &&messages) override;
+    QNetworkReply *asyncEmbed(QString &&model, QString &&text) override;
 
 protected:
     void fetchModels() override;

@@ -43,8 +43,8 @@ public:
         return m_models;
     }
 
-    virtual QIODevice *asyncChat(QString &&model, QJsonArray &&messages) = 0;
-    virtual QIODevice *asyncEmbed(QString &&model, QString &&text)       = 0;
+    virtual QNetworkReply *asyncChat(QString &&model, QJsonArray &&messages) = 0;
+    virtual QNetworkReply *asyncEmbed(QString &&model, QString &&text)       = 0;
 
 protected:
     virtual void fetchModels() = 0;

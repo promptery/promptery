@@ -1,5 +1,8 @@
 #include <ui/workflow_model.h>
 
+#include <ui/decorator_prompt_model.h>
+#include <ui/system_prompt_model.h>
+
 #include <model/backend_manager.h>
 #include <model/llm_interface.h>
 
@@ -11,6 +14,26 @@
 
 constexpr const char *cBackend = "backend";
 constexpr const char *cModel   = "model/";
+
+
+class WorkflowModelNEW : public NamedObjectModelWithData<WorkflowData>, public ModelInterface
+{
+    using Base = NamedObjectModelWithData<WorkflowData>;
+
+public:
+    using Base::Base;
+
+    TileChildData tileData() const override { return { tr("Workflows") }; }
+
+    void readSettings() override { Base::readSettings(cId); }
+    void storeSettings() const override { Base::storeSettings(cId); }
+
+protected:
+    QString newObjectName() const override { return tr("new workflow"); }
+
+private:
+    static constexpr const char *cId = "workflows";
+};
 
 
 class ComboboxListAdapter : public TreeToListModelAdapter
@@ -123,7 +146,20 @@ WorkflowModel::WorkflowModel(BackendManager *backends,
           new WorkflowAdapter<DecoratorPromptModel>(decoratorPromptModel, "decoratorPrompt", this))
     , m_systemPrompt(
           new WorkflowAdapter<SystemPromptModel>(systemPromptModel, "systemPrompt", this))
+    , m_workflowRaw(new WorkflowModelNEW(this))
+    , m_workflows(new WorkflowAdapter<WorkflowModelNEW>(m_workflowRaw, "workflow", this))
 {
+    {
+        auto *item = m_workflowRaw->createObject();
+        m_workflowRaw->setUserData(item->index(), WorkflowData("simple", ""));
+        m_workflowRaw->renameItem(item->index(), tr("Simple query"));
+    }
+    {
+        auto *item = m_workflowRaw->createObject();
+        m_workflowRaw->setUserData(item->index(), WorkflowData("basic_cot", ""));
+        m_workflowRaw->renameItem(item->index(), tr("Basic CoT query"));
+    }
+
     auto count = 0;
     for (const auto &llmEntry : m_backends->llmBackends()) {
         auto &llm = llmEntry.second;
@@ -168,6 +204,11 @@ QAbstractItemModel *WorkflowModel::decoratorPromptModel() const
 QAbstractItemModel *WorkflowModel::systemPromptModel() const
 {
     return m_systemPrompt->model();
+}
+
+QAbstractItemModel *WorkflowModel::workflowModel() const
+{
+    return m_workflows->model();
 }
 
 void WorkflowModel::setSelectedBackend(int index)
@@ -252,6 +293,21 @@ int WorkflowModel::selectedSystemPromptIdx() const
 SystemPromptData WorkflowModel::selectedSystemPrompt() const
 {
     return m_systemPrompt->selected();
+}
+
+void WorkflowModel::setSelectedWorkflowIdx(int index)
+{
+    m_workflows->setSelectedIdx(index);
+}
+
+int WorkflowModel::selectedWorkflowIdx() const
+{
+    return m_workflows->selectedIdx();
+}
+
+WorkflowData WorkflowModel::selectedWorkflow() const
+{
+    return m_workflows->selected();
 }
 
 void WorkflowModel::readSettings()

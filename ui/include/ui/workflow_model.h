@@ -1,7 +1,6 @@
 #pragma once
 
-#include <ui/decorator_prompt_model.h>
-#include <ui/system_prompt_model.h>
+#include <model/chat_types.h>
 
 #include <QObject>
 #include <QVariant>
@@ -11,6 +10,10 @@
 class BackendManager;
 class ComboboxListAdapter;
 class LlmInterface;
+
+class DecoratorPromptModel;
+class SystemPromptModel;
+class WorkflowModelNEW;
 
 class QAbstractItemModel;
 class QStandardItemModel;
@@ -27,7 +30,6 @@ public:
     Q_SIGNAL void selectedChanged();
 };
 
-
 class WorkflowModel : public QObject
 {
     Q_OBJECT
@@ -41,6 +43,7 @@ public:
     QAbstractItemModel *modelsModel() const;
     QAbstractItemModel *decoratorPromptModel() const;
     QAbstractItemModel *systemPromptModel() const;
+    QAbstractItemModel *workflowModel() const;
 
     Q_SIGNAL void selectedBackendChanged();
     void setSelectedBackend(int index);
@@ -65,6 +68,11 @@ public:
     int selectedSystemPromptIdx() const;
     SystemPromptData selectedSystemPrompt() const;
 
+    Q_SIGNAL void selectedWorkflowChanged();
+    void setSelectedWorkflowIdx(int index);
+    int selectedWorkflowIdx() const;
+    WorkflowData selectedWorkflow() const;
+
     void readSettings();
     void storeSettings() const;
 
@@ -78,6 +86,9 @@ private:
 
     WorkflowAdapter<DecoratorPromptModel> *m_decoratorPrompt;
     WorkflowAdapter<SystemPromptModel> *m_systemPrompt;
+
+    WorkflowModelNEW *m_workflowRaw;
+    WorkflowAdapter<WorkflowModelNEW> *m_workflows;
 
     // currently selected
     int m_backend;

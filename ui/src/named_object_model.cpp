@@ -69,7 +69,7 @@ void NamedObjectModel::readSettings(const QString &prefix)
     finally emptyGuard([this] {
         // we always need at least one object
         if (m_model->invisibleRootItem()->rowCount() == 0 && !emptyModelOk()) {
-            createObject(m_model->invisibleRootItem()->index());
+            createObject();
         }
     });
 
@@ -154,6 +154,11 @@ void NamedObjectModel::storeSettings(const QString &prefix) const
     }
 }
 
+QStandardItem *NamedObjectModel::createFolder()
+{
+    return createFolder(m_model->invisibleRootItem()->index());
+}
+
 QStandardItem *NamedObjectModel::createFolder(const QModelIndex &parent, const QString &uuid)
 {
     if (parent.isValid() && !isFolder(parent)) {
@@ -174,6 +179,11 @@ QStandardItem *NamedObjectModel::createFolder(const QModelIndex &parent, const Q
         m_model->appendRow(item.get());
     }
     return item.release();
+}
+
+QStandardItem *NamedObjectModel::createObject()
+{
+    return createObject(m_model->invisibleRootItem()->index());
 }
 
 QStandardItem *NamedObjectModel::createObject(const QModelIndex &parent, const QString &uuid)

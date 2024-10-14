@@ -36,7 +36,9 @@ bool WorkflowProcessor::beginNextStep()
         auto request = m_workflow->nextRequest();
         if (request.backend) {
             ++m_blockIndex;
-            Q_EMIT beginBlock(m_blockIndex, request.title);
+            if (m_workflow->isComplexWorkflow()) {
+                Q_EMIT beginBlock(m_blockIndex, request.title);
+            }
             m_responses.push_back(QString());
 
             m_reply = request.backend->asyncChat(std::move(request.model),
@@ -64,7 +66,9 @@ bool WorkflowProcessor::beginNextStep()
 
 void WorkflowProcessor::cleanUpReply()
 {
-    Q_EMIT endBlock(m_blockIndex);
+    if (m_workflow->isComplexWorkflow()) {
+        Q_EMIT endBlock(m_blockIndex);
+    }
 
     if (m_reply) {
         m_reply->disconnect(this);

@@ -583,16 +583,32 @@ bool ChatWidget::startQuery(QString query, ContextFiles contextFiles, ContextPag
         }
         chat.addInteraction(std::move(data));
     }
-    return m_processor->start(std::make_unique<WorkflowBasicWithSteps>(
-        m_workflowModel->selectedBackend().value(), // Todo: remove optional!
-        m_contentModel->itemModel(),
-        m_workflowModel->modelId(m_workflowModel->selectedModelIdx()),
-        std::move(query),
-        std::move(contextFiles),
-        std::move(contextPages),
-        std::move(chat),
-        m_workflowModel->selectedSystemPrompt(),
-        m_workflowModel->selectedDecoratorPrompt()));
+
+    const auto workflow = m_workflowModel->selectedWorkflow().name();
+    if (workflow == "simple") {
+        return m_processor->start(std::make_unique<WorkflowBasic>(
+            m_workflowModel->selectedBackend().value(), // Todo: remove optional!
+            m_contentModel->itemModel(),
+            m_workflowModel->modelId(m_workflowModel->selectedModelIdx()),
+            std::move(query),
+            std::move(contextFiles),
+            std::move(contextPages),
+            std::move(chat),
+            m_workflowModel->selectedSystemPrompt(),
+            m_workflowModel->selectedDecoratorPrompt()));
+    } else if (workflow == "basic_cot") {
+        return m_processor->start(std::make_unique<WorkflowBasicCoT>(
+            m_workflowModel->selectedBackend().value(), // Todo: remove optional!
+            m_contentModel->itemModel(),
+            m_workflowModel->modelId(m_workflowModel->selectedModelIdx()),
+            std::move(query),
+            std::move(contextFiles),
+            std::move(contextPages),
+            std::move(chat),
+            m_workflowModel->selectedSystemPrompt(),
+            m_workflowModel->selectedDecoratorPrompt()));
+    }
+    return false;
 }
 
 QJsonArray ChatWidget::chatAsJson(bool forSaving) const

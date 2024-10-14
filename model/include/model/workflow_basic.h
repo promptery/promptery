@@ -30,6 +30,8 @@ public:
     ChatRequest nextRequest() override;
     void finishRequest(ChatResponse /*response*/) override { /*nothing to do*/ }
 
+    bool isComplexWorkflow() const override { return false; }
+
 protected:
     QJsonArray chatAsJson() const;
 
@@ -48,7 +50,7 @@ protected:
     bool m_started{ false };
 };
 
-class WorkflowBasicWithSteps : public WorkflowBasic
+class WorkflowBasicCoT : public WorkflowBasic
 {
 public:
     using WorkflowBasic::WorkflowBasic;
@@ -57,7 +59,7 @@ public:
     ChatRequest nextRequest() override
     {
         if (m_counter == 0) {
-            m_title = QObject::tr("Response only thinking");
+            m_title = QObject::tr("Response without thinking");
             return WorkflowBasic::nextRequest();
         } else if (m_counter == 1) {
             m_title       = QObject::tr("Thinking step.");
@@ -82,6 +84,8 @@ public:
         }
         ++m_counter;
     }
+
+    bool isComplexWorkflow() const override { return true; }
 
 private:
     int m_counter{ 0 };

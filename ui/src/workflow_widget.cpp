@@ -13,6 +13,7 @@ WorkflowWidget::WorkflowWidget(WorkflowModel *workflowModel, QWidget *parent)
     , m_cmbModel(new ComboBox(this))
     , m_cmbDecorator(new ComboBox(this))
     , m_cmbSystemPrompt(new ComboBox(this))
+    , m_cmbWorkflow(new ComboBox(this))
 {
     auto *layout = new QGridLayout(this);
     auto margins = layout->contentsMargins();
@@ -22,6 +23,7 @@ WorkflowWidget::WorkflowWidget(WorkflowModel *workflowModel, QWidget *parent)
     layout->addWidget(new QLabel(tr("Model"), this), 0, 0);
     layout->addWidget(new QLabel(tr("System"), this), 1, 0);
     layout->addWidget(new QLabel(tr("Decorator"), this), 1, 2);
+    layout->addWidget(new QLabel(tr("Workflow"), this), 2, 0);
     layout->addWidget(m_cmbBackend, 0, 1);
     layout->addWidget(m_cmbModel, 0, 2, 1, 2);
     m_cmbModel->setSizePolicy(QSizePolicy::Expanding, m_cmbModel->sizePolicy().verticalPolicy());
@@ -31,6 +33,9 @@ WorkflowWidget::WorkflowWidget(WorkflowModel *workflowModel, QWidget *parent)
     layout->addWidget(m_cmbDecorator, 1, 3);
     m_cmbDecorator->setSizePolicy(QSizePolicy::Expanding,
                                   m_cmbDecorator->sizePolicy().verticalPolicy());
+    layout->addWidget(m_cmbWorkflow, 2, 1);
+    m_cmbWorkflow->setSizePolicy(QSizePolicy::Expanding,
+                                 m_cmbWorkflow->sizePolicy().verticalPolicy());
 
     connect(
         m_workflowModel, &WorkflowModel::modelsAvailable, this, &WorkflowWidget::modelsAvailable);
@@ -58,6 +63,12 @@ WorkflowWidget::WorkflowWidget(WorkflowModel *workflowModel, QWidget *parent)
             this,
             &WorkflowWidget::onSelectedSystemPromptChanged);
     m_cmbSystemPrompt->setModel(m_workflowModel->systemPromptModel());
+
+    connect(m_workflowModel,
+            &WorkflowModel::selectedWorkflowChanged,
+            this,
+            &WorkflowWidget::onSelectedWorkflowChanged);
+    m_cmbWorkflow->setModel(m_workflowModel->workflowModel());
 }
 
 void WorkflowWidget::showEvent(QShowEvent *event)
@@ -95,6 +106,14 @@ void WorkflowWidget::showEvent(QShowEvent *event)
     if (m_cmbSystemPrompt->currentIndex() == -1 && m_cmbSystemPrompt->count() > 0) {
         m_cmbSystemPrompt->setCurrentIndex(0);
     }
+
+    m_cmbWorkflow->setCurrentIndex(m_workflowModel->selectedWorkflowIdx());
+    connect(m_cmbWorkflow, &QComboBox::currentIndexChanged, this, [this](int index) {
+        m_workflowModel->setSelectedWorkflowIdx(index);
+    });
+    if (m_cmbWorkflow->currentIndex() == -1 && m_cmbWorkflow->count() > 0) {
+        m_cmbWorkflow->setCurrentIndex(0);
+    }
 }
 
 void WorkflowWidget::onSelectedBackendChanged()
@@ -123,6 +142,12 @@ void WorkflowWidget::onSelectedSystemPromptChanged()
 {
     QSignalBlocker b(m_cmbSystemPrompt);
     m_cmbSystemPrompt->setCurrentIndex(m_workflowModel->selectedSystemPromptIdx());
+}
+
+void WorkflowWidget::onSelectedWorkflowChanged()
+{
+    QSignalBlocker b(m_cmbWorkflow);
+    m_cmbWorkflow->setCurrentIndex(m_workflowModel->selectedWorkflowIdx());
 }
 
 void WorkflowWidget::modelsAvailable(const QString &backendId)

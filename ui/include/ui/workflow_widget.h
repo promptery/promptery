@@ -13,7 +13,7 @@ class WorkflowWidget : public TileChildInterface
 public:
     WorkflowWidget(WorkflowModel *workflowModel, QWidget *parent = nullptr);
 
-    TileChildData data() const override { return { "Workflow" }; }
+    TileChildData data() const override { return { "Process" }; }
 
 protected:
     void showEvent(QShowEvent *event) override;
@@ -24,6 +24,8 @@ private:
     Q_SLOT void onSelectedDecoratorChanged();
     Q_SLOT void onSelectedSystemPromptChanged();
 
+    Q_SLOT void onSelectedWorkflowChanged();
+
     Q_SLOT void modelsAvailable(const QString &backendId);
 
     WorkflowModel *m_workflowModel;
@@ -32,4 +34,6 @@ private:
     ComboBox *m_cmbModel;
     ComboBox *m_cmbDecorator;
     ComboBox *m_cmbSystemPrompt;
+
+    ComboBox *m_cmbWorkflow;
 };

@@ -190,4 +190,33 @@ public:
     virtual bool hasNext() const                      = 0;
     virtual ChatRequest nextRequest()                 = 0;
     virtual void finishRequest(ChatResponse response) = 0;
+
+    virtual bool isComplexWorkflow() const = 0; // complex == several steps
+};
+
+struct WorkflowData {
+    WorkflowData() = default;
+    WorkflowData(QString name, QString comment)
+        : m_name(std::move(name))
+        , m_comment(std::move(comment))
+    {
+    }
+
+    WorkflowData(const QJsonValue &json)
+    {
+        auto obj  = json.toObject();
+        m_name    = obj["name"].toString();
+        m_comment = obj["comment"].toString();
+    }
+    QJsonValue toJson() const
+    {
+        return QJsonObject{ { "name", m_name }, { "comment", m_comment } };
+    }
+
+    QString name() const { return m_name; }
+    QString comment() const { return m_comment; }
+
+private:
+    QString m_name;
+    QString m_comment;
 };

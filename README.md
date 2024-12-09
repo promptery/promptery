@@ -59,6 +59,11 @@ backup regularly. Currently all user data is stored in a settings directory that
 adheres to your platform's standard location for such files.
 
 
+## Download Prebuild Version
+
+Prebuild releases for Mac (Apple Silicon) and Windows are available on [GitHub](https://github.com/promptery/promptery/releases).
+
+
 ## Build and Run
 
 ### Prerequisites

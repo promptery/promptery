@@ -48,10 +48,9 @@ ChatRequest WorkflowBasic::nextRequest()
             const auto data = dataAdapter(m_contentModel, id, cDataRole);
             const auto name = dataAdapter(m_contentModel, id, Qt::DisplayRole);
             if (data.isValid() && name.isValid()) {
-                auto content =
-                    QString("Additional context\nName: '%1'\n====\n").arg(name.toString());
+                auto content = QString("\n```` {#%1}\n").arg(name.toString());
                 content += data.toString();
-                content += "\n====\n\n";
+                content += "\n````\n\n";
                 m_query = content + m_query;
             } else {
                 log(QObject::tr("Could not read content for key '%1'").arg(id.toString()));
@@ -65,9 +64,9 @@ ChatRequest WorkflowBasic::nextRequest()
         for (const auto &f : m_contextFiles.files) {
             QFile file(m_contextFiles.rootPath + "/" + f);
             if (file.open(QIODevice::ReadOnly)) {
-                auto content = QString("Additional context\nUri: '%1'\n====\n").arg(f);
+                auto content = QString("\n```` {#%1}\n").arg(f);
                 content += QString::fromLocal8Bit(file.readAll());
-                content += "\n====\n\n";
+                content += "\n````\n\n";
                 m_query = content + m_query;
             } else {
                 log(QObject::tr("Could not open file '%1'").arg(file.fileName()));
@@ -77,7 +76,7 @@ ChatRequest WorkflowBasic::nextRequest()
     // end load file context
 
     if (!m_contextFiles.empty() || !m_contextPages.empty()) {
-        m_query = "Consider the following context(s).\n\n" + m_query;
+        m_query = "Context:\n" + m_query;
     }
 
     auto json = chatAsJson();

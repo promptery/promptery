@@ -112,6 +112,7 @@ void FileSystemModel::addFilesRecursively(const QString &path, QStandardItem *pa
 
         QStandardItem *item = new QStandardItem(fileName);
         item->setCheckable(true);
+        item->setEditable(false);
         item->setData(relPath, cUuidRole);
         parent->appendRow(item);
 

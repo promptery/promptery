@@ -20,12 +20,13 @@ WorkflowWidget::WorkflowWidget(WorkflowModel *workflowModel, QWidget *parent)
     margins.setTop(0);
     layout->setContentsMargins(margins);
 
-    layout->addWidget(new QLabel(tr("Model"), this), 0, 0);
+    layout->addWidget(new QLabel(tr("Backend"), this), 0, 0);
+    layout->addWidget(new QLabel(tr("Main Model"), this), 0, 2);
     layout->addWidget(new QLabel(tr("System"), this), 1, 0);
     layout->addWidget(new QLabel(tr("Decorator"), this), 1, 2);
     layout->addWidget(new QLabel(tr("Workflow"), this), 2, 0);
     layout->addWidget(m_cmbBackend, 0, 1);
-    layout->addWidget(m_cmbModel, 0, 2, 1, 2);
+    layout->addWidget(m_cmbModel, 0, 3);
     m_cmbModel->setSizePolicy(QSizePolicy::Expanding, m_cmbModel->sizePolicy().verticalPolicy());
     layout->addWidget(m_cmbSystemPrompt, 1, 1);
     m_cmbSystemPrompt->setSizePolicy(QSizePolicy::Expanding,

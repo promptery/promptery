@@ -371,7 +371,7 @@ void ChatWidget::btnGoClicked()
 
     ui->edtInput->clear();
     m_current->setInput(text);
-    m_current->setInputContext(std::move(files), std::move(pages));
+    m_current->setInputContext(files, pages);
     writeTextToModel();
 
     QMetaObject::invokeMethod(

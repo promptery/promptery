@@ -59,7 +59,7 @@ public:
     ChatRequest nextRequest() override
     {
         if (m_counter == 0) {
-            m_title = QObject::tr("Response without thinking");
+            m_title = QObject::tr("Direct response");
             return WorkflowBasic::nextRequest();
         } else if (m_counter == 1) {
             m_title       = QObject::tr("Thinking step.");

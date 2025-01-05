@@ -9,6 +9,7 @@ public:
 
     QString id() const override;
     QString name() const override { return "Ollama backend"; }
+    QString address() const override;
 
     bool isDefaultLlm() const override { return true; }
 

@@ -165,6 +165,10 @@ WorkflowModel::WorkflowModel(BackendManager *backends,
         auto &llm = llmEntry.second;
         auto item = std::make_unique<QStandardItem>(llm->name());
         item->setData(llm->id());
+        const auto address = llm->address();
+        if (!address.isEmpty()) {
+            item->setData(address, Qt::ToolTipRole);
+        }
         m_backendModel->appendRow(item.release());
 
         if (llm->isDefaultLlm()) {
@@ -354,7 +358,7 @@ void WorkflowModel::onModelsAvailable(const QString &id)
                 if (model.type == ModelType::chat) {
                     auto item = std::make_unique<QStandardItem>(model.name);
                     item->setData(model.id);
-                    item->setData(model.id, Qt::ToolTipRole);
+                    item->setData(model.name + " - " + model.id, Qt::ToolTipRole);
                     m_modelsModel->appendRow(item.release());
                 }
             }

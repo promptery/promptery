@@ -20,6 +20,11 @@ QString OllamaInterface::id() const
     return OllamaConfig::backendId();
 }
 
+QString OllamaInterface::address() const
+{
+    return OllamaConfig::global().serverAddr("").toString();
+}
+
 QNetworkReply *OllamaInterface::asyncChat(QString &&model, QJsonArray &&messages)
 {
     QJsonObject json{ { "model", std::move(model) }, { "messages", std::move(messages) } };

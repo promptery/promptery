@@ -65,6 +65,7 @@
      <string>&amp;Settings</string>
     </property>
     <addaction name="actStoreWindowPosition"/>
+    <addaction name="actOpenSettingsDirectory"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -106,6 +107,11 @@
   <action name="actAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actOpenSettingsDirectory">
+   <property name="text">
+    <string>Open settings directory</string>
    </property>
   </action>
  </widget>

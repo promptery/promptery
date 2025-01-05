@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QScreen>
 #include <QToolBar>
+#include <QUrl>
 
 QString screenId()
 {
@@ -73,6 +74,9 @@ MainWindowApp::MainWindowApp(QWidget *parent)
 
     connect(
         ui->actStoreWindowPosition, &QAction::triggered, this, &MainWindowApp::storeWindowSettings);
+    connect(ui->actOpenSettingsDirectory, &QAction::triggered, this, []() {
+        QDesktopServices::openUrl(QUrl::fromLocalFile(Settings::global().settingsPath()));
+    });
 
     readSettings();
     m_chatMainWidget->initialize();

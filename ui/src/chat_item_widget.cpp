@@ -65,18 +65,16 @@ ChatItemWidget::ChatItemWidget(ContentModel *contentModel, QWidget *parent)
 
 ChatData::Interaction ChatItemWidget::itemData() const
 {
-    return ChatData::Interaction{ m_input->text(),
-                                  m_input->contextFiles(),
-                                  m_input->contextPages(),
-                                  m_output->toPlainText(),
-                                  itemEnabled() };
+    return ChatData::Interaction{ m_input->text(),         m_input->contextFiles(),
+                                  m_input->contextPages(), m_output->toPlainText(),
+                                  m_finalOutput,           itemEnabled() };
 }
 
 void ChatItemWidget::setItemData(const ChatData::Interaction &data)
 {
     setInput(data.input);
     setInputContext(data.contextFiles, data.pages);
-    insertOutput(data.output);
+    insertOutput(data.outputWithSteps);
     m_disableAction->setChecked(!data.enabled);
     disableActionTriggered();
 }
@@ -114,6 +112,22 @@ void ChatItemWidget::clearOutput()
 {
     m_output->clear();
     m_outputEmpty = true;
+    m_finalOutput.clear();
+}
+
+int ChatItemWidget::startOutputSection(const QString &output)
+{
+    const auto ret = insertOutput(output);
+    m_finalOutput.clear();
+    return ret;
+}
+
+int ChatItemWidget::endOutputSection(const QString &output)
+{
+    auto temp      = std::move(m_finalOutput);
+    const auto ret = insertOutput(output);
+    m_finalOutput  = std::move(temp);
+    return ret;
 }
 
 bool ChatItemWidget::itemEnabled() const
@@ -159,5 +173,6 @@ void ChatItemWidget::disableActionTriggered()
 int ChatItemWidget::insertAndResizeOutput(const QString &output)
 {
     m_output->insertPlainText(output);
+    m_finalOutput.append(output);
     return resize();
 }

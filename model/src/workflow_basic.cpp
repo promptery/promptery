@@ -97,7 +97,7 @@ QJsonArray WorkflowBasic::chatAsJson() const
     for (const auto &data : m_chat.interactions()) {
         if (data.enabled) {
             json.append(QJsonObject{ { "role", "user" }, { "content", data.input } });
-            json.append(QJsonObject{ { "role", "assistant" }, { "content", data.output } });
+            json.append(QJsonObject{ { "role", "assistant" }, { "content", data.finalOutput } });
         }
     }
     return json;

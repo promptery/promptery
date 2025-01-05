@@ -26,7 +26,8 @@ struct ChatData {
         QString input;
         ContextFiles contextFiles;
         ContextPages pages;
-        QString output;
+        QString outputWithSteps;
+        QString finalOutput;
         bool enabled;
     };
 
@@ -41,8 +42,14 @@ struct ChatData {
         for (const auto &i : arr) {
             const auto interaction = i.toObject();
             Interaction res;
-            res.input   = interaction["input"].toString();
-            res.output  = interaction["output"].toString();
+            res.input       = interaction["input"].toString();
+            res.finalOutput = interaction["output"].toString();
+            if (interaction.contains("outputWithSteps")) {
+                res.outputWithSteps = interaction["outputWithSteps"].toString();
+            }
+            if (res.outputWithSteps.isEmpty()) {
+                res.outputWithSteps = res.finalOutput;
+            }
             res.enabled = interaction["enabled"].toBool();
 
             if (!interaction["contextFiles"].isUndefined()) {
@@ -85,13 +92,16 @@ struct ChatData {
                 ids.append(i.toString());
             }
 
-            arr.append(QJsonObject{ { "input", i.input },
-                                    { "contextFiles",
-                                      QJsonObject{ { "rootPath", i.contextFiles.rootPath },
-                                                   { "files", std::move(files) } } },
-                                    { "contextPages", QJsonObject{ { "ids", std::move(ids) } } },
-                                    { "output", i.output },
-                                    { "enabled", i.enabled } });
+            arr.append(
+                QJsonObject{ { "input", i.input },
+                             { "contextFiles",
+                               QJsonObject{ { "rootPath", i.contextFiles.rootPath },
+                                            { "files", std::move(files) } } },
+                             { "contextPages", QJsonObject{ { "ids", std::move(ids) } } },
+                             { "outputWithSteps",
+                               i.outputWithSteps == i.finalOutput ? QString() : i.outputWithSteps },
+                             { "output", i.finalOutput },
+                             { "enabled", i.enabled } });
         }
 
         return QJsonObject{ { "interactions", std::move(arr) }, { "scroll", m_scroll } };

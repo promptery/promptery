@@ -631,9 +631,12 @@ QJsonArray ChatWidget::chatAsJson(bool forSaving) const
             continue;
         }
         json.append(QJsonObject{ { "role", "user" }, { "content", data.input } });
-        json.append(QJsonObject{ { "role", "assistant" }, { "content", data.output } });
         if (forSaving) {
+            json.append(
+                QJsonObject{ { "role", "assistant" }, { "content", data.outputWithSteps } });
             json.append(QJsonObject{ { "role", "enabled" }, { "content", data.enabled } });
+        } else {
+            json.append(QJsonObject{ { "role", "assistant" }, { "content", data.finalOutput } });
         }
     }
     return json;
@@ -641,24 +644,17 @@ QJsonArray ChatWidget::chatAsJson(bool forSaving) const
 
 void ChatWidget::procBeginBlock(int index, const QString &title)
 {
-    procNewContent(tr("==== %1 : %2 ====\n").arg(index).arg(title));
+    newOutput(m_current->startOutputSection(tr("==== %1 : %2 ====\n").arg(index).arg(title)));
 }
 
 void ChatWidget::procEndBlock(int index)
 {
-    procNewContent(tr("\n==== ~%1 ====\n\n").arg(index));
+    newOutput(m_current->endOutputSection(tr("\n==== ~%1 ====\n\n").arg(index)));
 }
 
 void ChatWidget::procNewContent(const QString &content)
 {
-    const int diff       = m_current->insertOutput(content);
-    const auto newHeight = ui->scrollSpacer->geometry().height() - diff;
-    if (newHeight < 50) { // magic number 50
-        setScrollSpacerToIdealheight();
-    } else {
-        ui->scrollSpacer->changeSize(0, newHeight, QSizePolicy::Minimum, QSizePolicy::Fixed);
-        ui->scrollContent->layout()->invalidate();
-    }
+    newOutput(m_current->insertOutput(content));
 }
 
 void ChatWidget::procFinished()
@@ -666,4 +662,15 @@ void ChatWidget::procFinished()
     cleanReply();
 
     setScrollSpacerToIdealheight();
+}
+
+void ChatWidget::newOutput(int diff)
+{
+    const auto newHeight = ui->scrollSpacer->geometry().height() - diff;
+    if (newHeight < 50) { // magic number 50
+        setScrollSpacerToIdealheight();
+    } else {
+        ui->scrollSpacer->changeSize(0, newHeight, QSizePolicy::Minimum, QSizePolicy::Fixed);
+        ui->scrollContent->layout()->invalidate();
+    }
 }

@@ -26,9 +26,13 @@ public:
     void setInput(const QString &input);
     void setInputContext(ContextFiles files, ContextPages pages);
 
-    // returns the hieght diff of the output widget
+    // returns the height diff of the output widget
     int insertOutput(const QString &output);
     void clearOutput();
+
+    // currently only used to store the last section, otherwise as ``insertOutput``
+    int startOutputSection(const QString &output);
+    int endOutputSection(const QString &output);
 
     bool itemEnabled() const;
 
@@ -51,6 +55,7 @@ private:
 
     InputWidget *m_input;
     OutputWidget *m_output;
+    QString m_finalOutput;
 
     QToolBar *m_inputBar;
     QWidget *m_activeIndicator;

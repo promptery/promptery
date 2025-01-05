@@ -6,14 +6,16 @@
 #include <QNetworkReply>
 #include <QTimer>
 
-constexpr auto cMirror = "internal_mirror";
+constexpr auto cMirror    = "internal_mirror";
+constexpr auto cTimeStamp = "internal_timestamp";
 
 class AsyncString : public QNetworkReply
 {
 public:
-    explicit AsyncString(QString str, QObject *parent = nullptr)
+    explicit AsyncString(QString model, QString str, QObject *parent = nullptr)
         : QNetworkReply(parent)
         , m_timer(new QTimer(this))
+        , m_model(std::move(model))
         , m_data(std::move(str))
     {
         open(QIODevice::ReadOnly);
@@ -55,17 +57,18 @@ protected:
 
         if (m_finish) {
             static const auto finalRresponse = QString(R"({
-  "model": "internal_mirror",
-  "created_at": "%1",
+  "model": "%1",
+  "created_at": "%2",
   "done": true,
   "total_duration": 42,
   "load_duration": 42,
-  "prompt_eval_count": %2,
+  "prompt_eval_count": %3,
   "prompt_eval_duration": 42,
-  "eval_count": %2,
+  "eval_count": %3,
   "eval_duration": 42
 })");
-            m_next = finalRresponse.arg(QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs))
+            m_next                           = finalRresponse
+                         .arg(m_model, QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs))
                          .arg(m_tokenCount)
                          .toUtf8();
             m_atEnd = true;
@@ -73,9 +76,9 @@ protected:
         }
 
         static const auto response = QString(R"({
-  "model": "internal_mirror",
-  "created_at": "%1",
-  "message": %2,
+  "model": "%1",
+  "created_at": "%2",
+  "message": %3,
   "done": false
 })");
 
@@ -93,7 +96,8 @@ protected:
             count = pos + 1 - m_index;
         }
         m_next = response
-                     .arg(QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs),
+                     .arg(m_model,
+                          QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs),
                           QString::fromLocal8Bit(
                               QJsonDocument({ { "role", "assistant" },
                                               { "content", m_data.mid(m_index, count) },
@@ -141,6 +145,7 @@ protected:
 
 private:
     QTimer *m_timer;
+    QString m_model;
     QString m_data;
     int m_interval{ 25 };
     bool m_block{ false };
@@ -162,7 +167,10 @@ QNetworkReply *InternalLlmBackend::asyncChat(QString &&model, QJsonArray &&messa
 {
     if ((model == cMirror) && !messages.isEmpty()) {
         auto str = messages.at(messages.count() - 1).toObject()["content"].toString();
-        return new AsyncString(std::move(str), this);
+        return new AsyncString(std::move(model), std::move(str), this);
+    } else if ((model == cTimeStamp) && !messages.isEmpty()) {
+        return new AsyncString(
+            std::move(model), QDateTime::currentDateTime().toString(Qt::TextDate), this);
     }
 
     return nullptr;
@@ -170,6 +178,7 @@ QNetworkReply *InternalLlmBackend::asyncChat(QString &&model, QJsonArray &&messa
 
 void InternalLlmBackend::fetchModels()
 {
-    setModels({ { cMirror, "Mirror", ModelType::chat } });
+    setModels(
+        { { cMirror, "Mirror", ModelType::chat }, { cTimeStamp, "Time stamp", ModelType::chat } });
     Q_EMIT modelsAvailable(id());
 }

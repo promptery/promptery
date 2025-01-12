@@ -27,7 +27,7 @@ ChatMainWidget::ChatMainWidget(QWidget *parent)
     , m_decoratorPromptModel(new DecoratorPromptModel(this))
     , m_systemPromptModel(new SystemPromptModel(this))
     , m_workflowModel(
-          new WorkflowModel(m_backends, m_decoratorPromptModel, m_systemPromptModel, this))
+          new WorkflowModel(m_backends, m_systemPromptModel, m_decoratorPromptModel, this))
     , m_settingWidget(new SettingsWidget(m_backends, this))
     , m_pages({ { new ChatWidget(m_chatModel, m_contentModel, m_workflowModel, this), nullptr },
                 { new ContentWidget(m_contentModel, this), nullptr },

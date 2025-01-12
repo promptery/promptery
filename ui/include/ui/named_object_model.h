@@ -21,7 +21,6 @@ public:
 
     std::vector<QAction *> actions() const override { return {}; }
 
-    static int idRole();
     QVariant uuid(const QModelIndex &index) const;
 
     QVariant data(const QVariant &uuid, int role) const;

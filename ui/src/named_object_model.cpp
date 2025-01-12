@@ -42,14 +42,9 @@ const QAbstractItemModel *NamedObjectModel::itemModel() const
     return m_model;
 }
 
-int NamedObjectModel::idRole()
-{
-    return cUuidRole;
-}
-
 QVariant NamedObjectModel::uuid(const QModelIndex &index) const
 {
-    return index.data(idRole());
+    return index.data(cUuidRole);
 }
 
 QVariant NamedObjectModel::data(const QVariant &uuid, int role) const
@@ -131,13 +126,13 @@ void NamedObjectModel::storeSettings(const QString &prefix) const
                 json.append(QJsonObject(
                     { { "type", to_underlying(ItemType::Folder) },
                       { "name", childItem->text() },
-                      { "uuid", childItem->data(idRole()).toUuid().toString(QUuid::WithoutBraces) },
+                      { "uuid", childItem->data(cUuidRole).toUuid().toString(QUuid::WithoutBraces) },
                       { "children", fct(childItem) } }));
             } else {
                 json.append(QJsonObject(
                     { { "type", to_underlying(ItemType::Object) },
                       { "name", childItem->text() },
-                      { "uuid", childItem->data(idRole()).toUuid().toString(QUuid::WithoutBraces) },
+                      { "uuid", childItem->data(cUuidRole).toUuid().toString(QUuid::WithoutBraces) },
                       { "data", storeItem(childItem) } }));
             }
         }
@@ -170,7 +165,7 @@ QStandardItem *NamedObjectModel::createFolder(const QModelIndex &parent, const Q
     item->setEditable(true);
     item->setDragEnabled(true);
     item->setDropEnabled(true);
-    item->setData(uuid.isEmpty() ? QUuid::createUuid() : QUuid::fromString(uuid), idRole());
+    item->setData(uuid.isEmpty() ? QUuid::createUuid() : QUuid::fromString(uuid), cUuidRole);
     item->setData(Folder, cTypeRole);
 
     if (parent.isValid()) {
@@ -197,7 +192,7 @@ QStandardItem *NamedObjectModel::createObject(const QModelIndex &parent, const Q
     item->setEditable(true);
     item->setDragEnabled(true);
     item->setDropEnabled(false);
-    item->setData(uuid.isEmpty() ? QUuid::createUuid() : QUuid::fromString(uuid), idRole());
+    item->setData(uuid.isEmpty() ? QUuid::createUuid() : QUuid::fromString(uuid), cUuidRole);
     item->setData(Object, cTypeRole);
 
     if (parent.isValid()) {

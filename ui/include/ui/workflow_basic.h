@@ -4,6 +4,7 @@
 
 class QAbstractItemModel;
 class ContentModel;
+class ChatRequestConfigModel;
 
 
 // Hier geht es weiter.
@@ -16,14 +17,12 @@ class ContentModel;
 class WorkflowBasic : public WorkflowInterface
 {
 public:
-    WorkflowBasic(LlmInterface *backend,
+    WorkflowBasic(ChatRequestConfigModel *config,
                   QAbstractItemModel *contentModel,
-                  QString model,
                   QString query,
                   ContextFiles contextFiles,
                   ContextPages contextPages,
                   ChatData chat,
-                  SystemPromptData systemPrompt,
                   DecoratorPromptData decoratorPrompt);
 
     bool hasNext() const override { return !m_started; }
@@ -35,16 +34,15 @@ public:
 protected:
     QJsonArray chatAsJson() const;
 
-    LlmInterface *m_backend;
+    ChatRequestConfigModel *m_currentConfig;
+
     QAbstractItemModel *m_contentModel;
 
     QString m_title{ QObject::tr("response") };
-    QString m_model;
     QString m_query;
     ContextFiles m_contextFiles;
     ContextPages m_contextPages;
     ChatData m_chat;
-    SystemPromptData m_systemPrompt;
     DecoratorPromptData m_decoratorPrompt;
 
     bool m_started{ false };
@@ -53,34 +51,49 @@ protected:
 class WorkflowBasicCoT : public WorkflowBasic
 {
 public:
-    using WorkflowBasic::WorkflowBasic;
+    WorkflowBasicCoT(ChatRequestConfigModel *baseConfig,
+                     ChatRequestConfigModel *refineConfig,
+                     QAbstractItemModel *contentModel,
+                     QString query,
+                     ContextFiles contextFiles,
+                     ContextPages contextPages,
+                     ChatData chat,
+                     DecoratorPromptData decoratorPrompt)
+        : WorkflowBasic(baseConfig,
+                        contentModel,
+                        std::move(query),
+                        std::move(contextFiles),
+                        std::move(contextPages),
+                        std::move(chat),
+                        std::move(decoratorPrompt))
+        , m_refineConfig(refineConfig)
+    {
+    }
 
-    bool hasNext() const override { return m_counter < 3; }
+    bool hasNext() const override { return m_counter < 2; }
     ChatRequest nextRequest() override
     {
         if (m_counter == 0) {
-            m_title = QObject::tr("Direct response");
-            return WorkflowBasic::nextRequest();
-        } else if (m_counter == 1) {
-            m_title       = QObject::tr("Thinking step.");
+            m_title       = QObject::tr("Base step.");
             m_queryStored = m_query;
-            m_query = "Think about how you would solve the following question. What steps are "
-                      "needed to solve the question? Be very precise. Only output the steps needed "
-                      "not the solution.\n\nQuestion:\n" +
+            m_query = "List the steps necessary for solving questions like the following. Only "
+                      "output the steps needed not the solution.\n\nQuestion:\n" +
                       m_queryStored;
             return WorkflowBasic::nextRequest();
-        } else if (m_counter == 2) {
-            m_title = QObject::tr("Response with thinking steps as input.");
-            m_query = "Question: \n" + m_queryStored +
-                      "\n\nAdhere to the following steps to solve the above question:\n" + m_steps;
+        } else if (m_counter == 1) {
+            m_title = QObject::tr("Refinement step.");
+            m_query = "Context:\n" + QString("\n````\n") + m_baseResponse + "\n````\n\n";
+            m_query +=
+                "Adhere to the given context to solve the following question:\n" + m_queryStored;
+            m_currentConfig = m_refineConfig;
             return WorkflowBasic::nextRequest();
         }
         return ChatRequest{};
     }
     void finishRequest(ChatResponse response) override
     {
-        if (m_counter == 1) {
-            m_steps = response.response;
+        if (m_counter == 0) {
+            m_baseResponse = response.response;
         }
         ++m_counter;
     }
@@ -88,7 +101,9 @@ public:
     bool isComplexWorkflow() const override { return true; }
 
 private:
+    ChatRequestConfigModel *m_refineConfig;
+
     int m_counter{ 0 };
-    QString m_steps;
+    QString m_baseResponse;
     QString m_queryStored;
 };

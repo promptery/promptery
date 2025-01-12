@@ -83,7 +83,7 @@ private:
     Q_SLOT void btnGoClicked();
     Q_SLOT void btnClearInputClicked();
     Q_SLOT void abortReply();
-    Q_SLOT void modelsAvailable(const QString &backendId);
+    Q_SLOT void workflowReady(bool isReady);
 
     // model connection
     Q_SLOT void currentIndexChanged(const QModelIndex &idx);

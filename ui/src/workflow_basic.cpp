@@ -1,4 +1,6 @@
-#include <model/workflow_basic.h>
+#include <ui/workflow_basic.h>
+
+#include <ui/chat_request_config_model.h>
 
 #include <model/defines.h>
 
@@ -7,23 +9,19 @@
 #include <QAbstractItemModel>
 #include <QFile>
 
-WorkflowBasic::WorkflowBasic(LlmInterface *backend,
+WorkflowBasic::WorkflowBasic(ChatRequestConfigModel *config,
                              QAbstractItemModel *contentModel,
-                             QString model,
                              QString query,
                              ContextFiles contextFiles,
                              ContextPages contextPages,
                              ChatData chat,
-                             SystemPromptData systemPrompt,
                              DecoratorPromptData decoratorPrompt)
-    : m_backend(backend)
+    : m_currentConfig(config)
     , m_contentModel(contentModel)
-    , m_model(std::move(model))
     , m_query(std::move(query))
     , m_contextFiles(std::move(contextFiles))
     , m_contextPages(std::move(contextPages))
     , m_chat(std::move(chat))
-    , m_systemPrompt(std::move(systemPrompt))
     , m_decoratorPrompt(std::move(decoratorPrompt))
 {
 }
@@ -82,14 +80,17 @@ ChatRequest WorkflowBasic::nextRequest()
     auto json = chatAsJson();
     json.append(QJsonObject{ { "role", "user" }, { "content", m_query } });
 
-    return ChatRequest{ m_title, m_backend, m_model, std::move(json) };
+    return ChatRequest{ m_title,
+                        m_currentConfig->selectedBackend().value(),
+                        m_currentConfig->modelId(m_currentConfig->selectedModelIdx()),
+                        std::move(json) };
 }
 
 QJsonArray WorkflowBasic::chatAsJson() const
 {
     QJsonArray json;
 
-    auto system = m_systemPrompt.systemPrompt();
+    auto system = m_currentConfig->selectedSystemPrompt().systemPrompt();
     if (!system.isEmpty()) {
         json.append(QJsonObject{ { "role", "system" }, { "content", std::move(system) } });
     }

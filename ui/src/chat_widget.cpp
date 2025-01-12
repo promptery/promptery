@@ -1,3 +1,4 @@
+#include "ui/chat_request_config_model.h"
 #include "ui_chat_widget.h"
 #include <ui/chat_widget.h>
 
@@ -14,12 +15,12 @@
 #include <ui/system_prompt_widget.h>
 #include <ui/tab_view.h>
 #include <ui/tile_widget.h>
+#include <ui/workflow_basic.h>
 #include <ui/workflow_model.h>
 #include <ui/workflow_widget.h>
 
 #include <model/backend_manager.h>
 #include <model/llm_interface.h>
-#include <model/workflow_basic.h>
 #include <model/workflow_processor.h>
 
 #include <common/log.h>
@@ -169,7 +170,7 @@ ChatWidget::ChatWidget(ChatModel *chatModel,
 
     connect(&m_scrollTimer, &QTimer::timeout, this, &ChatWidget::updateScroll);
 
-    connect(m_workflowModel, &WorkflowModel::modelsAvailable, this, &ChatWidget::modelsAvailable);
+    connect(m_workflowModel, &WorkflowModel::workflowReady, this, &ChatWidget::workflowReady);
 
     connect(m_processor, &WorkflowProcessor::beginBlock, this, &ChatWidget::procBeginBlock);
     connect(m_processor, &WorkflowProcessor::endBlock, this, &ChatWidget::procEndBlock);
@@ -341,7 +342,7 @@ void ChatWidget::clear()
 
 void ChatWidget::btnGoClicked()
 {
-    if (m_workflowModel->selectedModelIdx() == -1) {
+    if (!m_workflowModel->isReady()) {
         return;
     }
 
@@ -402,10 +403,10 @@ void ChatWidget::abortReply()
     }
 }
 
-void ChatWidget::modelsAvailable(const QString &backendId)
+void ChatWidget::workflowReady(bool isReady)
 {
     // ToDo: should be only enabled if model is selected
-    m_btnGo->setEnabled(m_workflowModel->modelsModel()->rowCount());
+    m_btnGo->setEnabled(isReady);
 }
 
 void ChatWidget::currentIndexChanged(const QModelIndex &idx)
@@ -586,36 +587,35 @@ bool ChatWidget::startQuery(QString query, ContextFiles contextFiles, ContextPag
 
     const auto workflow = m_workflowModel->selectedWorkflow().name();
     if (workflow == "simple") {
-        return m_processor->start(std::make_unique<WorkflowBasic>(
-            m_workflowModel->selectedBackend().value(), // Todo: remove optional!
-            m_contentModel->itemModel(),
-            m_workflowModel->modelId(m_workflowModel->selectedModelIdx()),
-            std::move(query),
-            std::move(contextFiles),
-            std::move(contextPages),
-            std::move(chat),
-            m_workflowModel->selectedSystemPrompt(),
-            m_workflowModel->selectedDecoratorPrompt()));
+        return m_processor->start(
+            std::make_unique<WorkflowBasic>(m_workflowModel->baseModel(),
+                                            m_contentModel->itemModel(),
+                                            std::move(query),
+                                            std::move(contextFiles),
+                                            std::move(contextPages),
+                                            std::move(chat),
+                                            m_workflowModel->selectedDecoratorPrompt()));
     } else if (workflow == "basic_cot") {
-        return m_processor->start(std::make_unique<WorkflowBasicCoT>(
-            m_workflowModel->selectedBackend().value(), // Todo: remove optional!
-            m_contentModel->itemModel(),
-            m_workflowModel->modelId(m_workflowModel->selectedModelIdx()),
-            std::move(query),
-            std::move(contextFiles),
-            std::move(contextPages),
-            std::move(chat),
-            m_workflowModel->selectedSystemPrompt(),
-            m_workflowModel->selectedDecoratorPrompt()));
+        return m_processor->start(
+            std::make_unique<WorkflowBasicCoT>(m_workflowModel->baseModel(),
+                                               m_workflowModel->refineModel(),
+                                               m_contentModel->itemModel(),
+                                               std::move(query),
+                                               std::move(contextFiles),
+                                               std::move(contextPages),
+                                               std::move(chat),
+                                               m_workflowModel->selectedDecoratorPrompt()));
     }
     return false;
 }
 
 QJsonArray ChatWidget::chatAsJson(bool forSaving) const
 {
+    assert(forSaving); // ToDo
+
     QJsonArray json;
 
-    auto systemPrompt = m_workflowModel->selectedSystemPrompt();
+    auto systemPrompt = m_workflowModel->baseModel()->selectedSystemPrompt();
     auto system       = systemPrompt.systemPrompt();
     if (!system.isEmpty()) {
         json.append(QJsonObject{ { "role", "system" }, { "content", std::move(system) } });

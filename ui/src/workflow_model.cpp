@@ -36,18 +36,18 @@ WorkflowModel::WorkflowModel(BackendManager *backends,
     : QObject(parent)
     , m_decoratorPrompt(
           new WorkflowAdapter<DecoratorPromptModel>(decoratorPromptModel, "decoratorPrompt", this))
-    , m_baseModel(new ChatRequestConfigModel(backends, systemPromptModel))
-    , m_refineModel(new ChatRequestConfigModel(backends, systemPromptModel))
+    , m_baseModel(new ChatRequestConfigModel(backends, systemPromptModel, ""))
+    , m_refineModel(new ChatRequestConfigModel(backends, systemPromptModel, "refiner"))
     , m_workflowRaw(new WorkflowModelNEW(this))
     , m_workflows(new WorkflowAdapter<WorkflowModelNEW>(m_workflowRaw, "workflow", this))
 {
     {
-        auto *item = m_workflowRaw->createObject();
+        auto *item = m_workflowRaw->createObject("0698a3af-fe67-4f64-bd7e-4b531852cce3");
         m_workflowRaw->setUserData(item->index(), WorkflowData("simple", ""));
         m_workflowRaw->renameItem(item->index(), tr("Simple query"));
     }
     {
-        auto *item = m_workflowRaw->createObject();
+        auto *item = m_workflowRaw->createObject("44b2fafa-30f7-4e52-a6af-e7c1a5cafc21");
         m_workflowRaw->setUserData(item->index(), WorkflowData("basic_cot", ""));
         m_workflowRaw->renameItem(item->index(), tr("Basic CoT query"));
     }
@@ -118,9 +118,19 @@ WorkflowData WorkflowModel::selectedWorkflow() const
 void WorkflowModel::readSettings()
 {
     m_decoratorPrompt->readSettings();
+
+    m_baseModel->readSettings();
+    m_refineModel->readSettings();
+
+    m_workflows->readSettings();
 }
 
 void WorkflowModel::storeSettings() const
 {
     m_decoratorPrompt->storeSettings();
+
+    m_baseModel->storeSettings();
+    m_refineModel->storeSettings();
+
+    m_workflows->storeSettings();
 }

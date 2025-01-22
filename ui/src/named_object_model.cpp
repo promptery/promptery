@@ -176,9 +176,9 @@ QStandardItem *NamedObjectModel::createFolder(const QModelIndex &parent, const Q
     return item.release();
 }
 
-QStandardItem *NamedObjectModel::createObject()
+QStandardItem *NamedObjectModel::createObject(const QString &uuid)
 {
-    return createObject(m_model->invisibleRootItem()->index());
+    return createObject(m_model->invisibleRootItem()->index(), uuid);
 }
 
 QStandardItem *NamedObjectModel::createObject(const QModelIndex &parent, const QString &uuid)

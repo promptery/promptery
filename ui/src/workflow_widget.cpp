@@ -80,15 +80,23 @@ void WorkflowWidget::showEvent(QShowEvent *event)
         m_cmbDecorator->setCurrentIndex(0);
     }
 
-    m_cmbWorkflow->setCurrentIndex(m_workflowModel->selectedWorkflowIdx());
-    connect(m_cmbWorkflow, &QComboBox::currentIndexChanged, this, [this](int index) {
+    m_workflowModel->readSettings();
+
+    auto setRefinerState = [this](int index) {
         m_workflowModel->setSelectedWorkflowIdx(index);
         for (auto i = 0; i < m_layout->columnCount(); i++) {
             if (auto *item = m_layout->itemAtPosition(2, i)) {
                 item->widget()->setEnabled(index == 1);
             }
         }
-    });
+    };
+
+    const auto index = m_workflowModel->selectedWorkflowIdx();
+    m_cmbWorkflow->setCurrentIndex(index);
+    // needs to be done manually, slot not called during show
+    setRefinerState(index);
+
+    connect(m_cmbWorkflow, &QComboBox::currentIndexChanged, this, setRefinerState);
     if (m_cmbWorkflow->currentIndex() == -1 && m_cmbWorkflow->count() > 0) {
         m_cmbWorkflow->setCurrentIndex(0);
     }

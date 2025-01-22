@@ -22,6 +22,7 @@ class ChatRequestConfigModel : public QObject
 public:
     ChatRequestConfigModel(BackendManager *backends,
                            SystemPromptModel *systemPromptModel,
+                           QString settingsKey, // empty means base model, backwards compatibility
                            QObject *parent = nullptr);
 
     QAbstractItemModel *backendModel() const;
@@ -58,6 +59,8 @@ private:
     QStandardItemModel *m_modelsModel;
 
     WorkflowAdapter<SystemPromptModel> *m_systemPrompt;
+
+    QString m_settingsKey;
 
     // currently selected
     int m_backend;

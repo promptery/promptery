@@ -11,8 +11,41 @@
 constexpr const char *cBackend = "backend";
 constexpr const char *cModel   = "model/";
 
+struct SettingsRAII {
+    SettingsRAII(QString settingsKey)
+        : m_settings(Settings::global())
+        , m_settingsKey(std::move(settingsKey))
+    {
+        m_settings.sync();
+        if (!m_settingsKey.isEmpty()) {
+            m_settings.beginGroup(m_settingsKey);
+        }
+    }
+    ~SettingsRAII()
+    {
+        if (!m_settingsKey.isEmpty()) {
+            m_settings.endGroup();
+        }
+        m_settings.sync();
+    }
+    void setValue(QAnyStringView key, const QVariant &value)
+    {
+        m_settings.setValue(std::move(key), value);
+    }
+    QVariant value(QAnyStringView key, const QVariant &defaultValue) const
+    {
+        return m_settings.value(std::move(key), defaultValue);
+    }
+
+private:
+    Settings &m_settings;
+    QString m_settingsKey;
+};
+
+
 ChatRequestConfigModel::ChatRequestConfigModel(BackendManager *backends,
                                                SystemPromptModel *systemPromptModel,
+                                               QString settingsKey,
                                                QObject *parent)
     : QObject(parent)
     , m_backends(backends)
@@ -20,6 +53,7 @@ ChatRequestConfigModel::ChatRequestConfigModel(BackendManager *backends,
     , m_modelsModel(new QStandardItemModel(this))
     , m_systemPrompt(
           new WorkflowAdapter<SystemPromptModel>(systemPromptModel, "systemPrompt", this))
+    , m_settingsKey(std::move(settingsKey))
 {
     auto count = 0;
     for (const auto &llmEntry : m_backends->llmBackends()) {
@@ -68,9 +102,10 @@ void ChatRequestConfigModel::setSelectedBackend(int index)
 {
     m_backend = index;
 
-    auto &s = Settings::global();
-    s.setValue(QString(cModel) + cBackend, backendId(m_backend));
-    s.sync();
+    {
+        auto s = SettingsRAII(m_settingsKey);
+        s.setValue(QString(cModel) + cBackend, backendId(m_backend));
+    }
 
     Q_EMIT selectedBackendChanged();
 
@@ -95,9 +130,10 @@ void ChatRequestConfigModel::setSelectedModelIdx(int index)
 {
     m_modelId = index == -1 ? "" : m_modelsModel->item(index)->data().toString();
 
-    auto &s = Settings::global();
-    s.setValue(cModel + backendId(m_backend), m_modelId);
-    s.sync();
+    {
+        auto s = SettingsRAII(m_settingsKey);
+        s.setValue(cModel + backendId(m_backend), m_modelId);
+    }
 
     Q_EMIT selectedModelChanged();
 }
@@ -120,6 +156,7 @@ QString ChatRequestConfigModel::modelId(int idx) const
 
 void ChatRequestConfigModel::setSelectedSystemPromptIdx(int index)
 {
+    auto s = SettingsRAII(m_settingsKey);
     m_systemPrompt->setSelectedIdx(index);
 }
 
@@ -135,8 +172,7 @@ SystemPromptData ChatRequestConfigModel::selectedSystemPrompt() const
 
 void ChatRequestConfigModel::readSettings()
 {
-    auto &s = Settings::global();
-    s.sync();
+    auto s = SettingsRAII(m_settingsKey);
     {
         const auto currentId = backendId(m_backend);
         const auto readId    = s.value(QString(cModel) + cBackend, currentId).toString();
@@ -155,10 +191,9 @@ void ChatRequestConfigModel::readSettings()
 
 void ChatRequestConfigModel::storeSettings() const
 {
-    auto &s = Settings::global();
+    auto s = SettingsRAII(m_settingsKey);
     s.setValue(QString(cModel) + cBackend, backendId(m_backend));
     s.setValue(cModel + backendId(m_backend), m_modelId);
-    s.sync();
     m_systemPrompt->storeSettings();
 }
 
@@ -181,8 +216,10 @@ void ChatRequestConfigModel::onModelsAvailable(const QString &id)
             }
         }
     }
-    m_modelId =
-        Settings::global().value(cModel + backendId(selectedBackendIdx()), m_modelId).toString();
+    {
+        auto s    = SettingsRAII(m_settingsKey);
+        m_modelId = s.value(cModel + backendId(selectedBackendIdx()), m_modelId).toString();
+    }
 
     Q_EMIT modelsAvailable(id);
 }

@@ -29,6 +29,7 @@ public:
 
     virtual QString id() const   = 0;
     virtual QString name() const = 0;
+    virtual QString address() const { return ""; }
 
     virtual bool isDefaultLlm() const { return false; }
 

@@ -24,6 +24,8 @@ public:
         return settingsPath(m_projectName) + fileName;
     }
 
+    QString settingsPath() const { return settingsPath(m_projectName); }
+
 private:
     Settings(const QString &projectName, Format format)
         : QSettings(settingsPath(projectName) + "settings.ini", format)

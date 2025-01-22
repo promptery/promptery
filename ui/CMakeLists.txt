@@ -8,6 +8,8 @@ set(LIB_SOURCES
     include/ui/chat_main_widget.h
     include/ui/chat_model.h
     include/ui/chat_output_widget.h
+    include/ui/chat_request_config_model.h
+    include/ui/chat_request_config_widget.h
     include/ui/chat_widget.h
     include/ui/content_model.h
     include/ui/content_widget.h
@@ -28,6 +30,8 @@ set(LIB_SOURCES
     include/ui/tab_view.h
     include/ui/tile_child_interface.h
     include/ui/tile_widget.h
+    include/ui/workflow_adapter.h
+    include/ui/workflow_basic.h
     include/ui/workflow_model.h
     include/ui/workflow_widget.h
 
@@ -36,6 +40,8 @@ set(LIB_SOURCES
     src/chat_main_widget.cpp
     src/chat_main_widget.ui
     src/chat_output_widget.cpp
+    src/chat_request_config_model.cpp
+    src/chat_request_config_widget.cpp
     src/chat_widget.cpp
     src/chat_widget.ui
     src/content_widget.cpp
@@ -55,6 +61,7 @@ set(LIB_SOURCES
     src/system_prompt_widget.ui
     src/tab_view.cpp
     src/tile_widget.cpp
+    src/workflow_basic.cpp
     src/workflow_model.cpp
     src/workflow_widget.cpp
 

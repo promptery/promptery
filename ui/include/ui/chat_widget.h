@@ -83,7 +83,7 @@ private:
     Q_SLOT void btnGoClicked();
     Q_SLOT void btnClearInputClicked();
     Q_SLOT void abortReply();
-    Q_SLOT void modelsAvailable(const QString &backendId);
+    Q_SLOT void workflowReady(bool isReady);
 
     // model connection
     Q_SLOT void currentIndexChanged(const QModelIndex &idx);
@@ -100,8 +100,7 @@ private:
     Q_SLOT void updateScroll();
     void setScrollSpacerToIdealheight();
 
-    bool
-    startQuery(QString query, ContextFiles contextFiles, ContextPages contextPages);
+    bool startQuery(QString query, ContextFiles contextFiles, ContextPages contextPages);
 
     QJsonArray chatAsJson(bool forSaving) const;
 
@@ -110,6 +109,7 @@ private:
     Q_SLOT void procEndBlock(int index);
     Q_SLOT void procNewContent(const QString &content);
     Q_SLOT void procFinished();
+    void newOutput(int diff);
 
     Ui::ChatWidget *ui;
     QPushButton *m_btnGo;

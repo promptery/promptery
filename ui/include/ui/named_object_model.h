@@ -21,7 +21,6 @@ public:
 
     std::vector<QAction *> actions() const override { return {}; }
 
-    static int idRole();
     QVariant uuid(const QModelIndex &index) const;
 
     QVariant data(const QVariant &uuid, int role) const;
@@ -34,7 +33,7 @@ public:
 
     QStandardItem *createFolder();
     QStandardItem *createFolder(const QModelIndex &parent, const QString &uuid = "");
-    QStandardItem *createObject();
+    QStandardItem *createObject(const QString &uuid = "");
     QStandardItem *createObject(const QModelIndex &parent, const QString &uuid = "");
 
     void renameItem(const QModelIndex &index, const QString &newName);

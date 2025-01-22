@@ -6,14 +6,12 @@ set(LIB_SOURCES
     include/model/llm_interface.h
     include/model/ollama_config.h
     include/model/ollama_interface.h
-    include/model/workflow_basic.h
     include/model/workflow_processor.h
 
     src/backend_manager.cpp
     src/internal_llm_backend.cpp
     src/ollama_config.cpp
     src/ollama_interface.cpp
-    src/workflow_basic.cpp
     src/workflow_processor.cpp
 )
 

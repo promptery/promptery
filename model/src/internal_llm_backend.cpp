@@ -163,7 +163,9 @@ InternalLlmBackend::InternalLlmBackend(QObject *parent)
 {
 }
 
-QNetworkReply *InternalLlmBackend::asyncChat(QString &&model, QJsonArray &&messages)
+QNetworkReply *InternalLlmBackend::asyncChat(QString &&model,
+                                             QJsonArray &&messages,
+                                             const RequestOptions & /*options*/)
 {
     if ((model == cMirror) && !messages.isEmpty()) {
         auto str = messages.at(messages.count() - 1).toObject()["content"].toString();

@@ -23,7 +23,8 @@ public:
                   ContextFiles contextFiles,
                   ContextPages contextPages,
                   ChatData chat,
-                  DecoratorPromptData decoratorPrompt);
+                  DecoratorPromptData decoratorPrompt,
+                  RequestOptions options);
 
     bool hasNext() const override { return !m_started; }
     ChatRequest nextRequest() override;
@@ -44,6 +45,7 @@ protected:
     ContextPages m_contextPages;
     ChatData m_chat;
     DecoratorPromptData m_decoratorPrompt;
+    RequestOptions m_options;
 
     bool m_started{ false };
 };
@@ -58,14 +60,16 @@ public:
                      ContextFiles contextFiles,
                      ContextPages contextPages,
                      ChatData chat,
-                     DecoratorPromptData decoratorPrompt)
+                     DecoratorPromptData decoratorPrompt,
+                     RequestOptions options)
         : WorkflowBasic(baseConfig,
                         contentModel,
                         std::move(query),
                         std::move(contextFiles),
                         std::move(contextPages),
                         std::move(chat),
-                        std::move(decoratorPrompt))
+                        std::move(decoratorPrompt),
+                        std::move(options))
         , m_refineConfig(refineConfig)
     {
     }

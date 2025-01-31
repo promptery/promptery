@@ -61,6 +61,8 @@ public:
     QWidget *sideView() override;
 
     void readSettings() override;
+    void updateUi() override;
+
     void prepareStoreSettings() override;
     void storeSettings() const override;
     void saveState() const override;

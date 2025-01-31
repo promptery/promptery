@@ -15,7 +15,8 @@ WorkflowBasic::WorkflowBasic(ChatRequestConfigModel *config,
                              ContextFiles contextFiles,
                              ContextPages contextPages,
                              ChatData chat,
-                             DecoratorPromptData decoratorPrompt)
+                             DecoratorPromptData decoratorPrompt,
+                             RequestOptions options)
     : m_currentConfig(config)
     , m_contentModel(contentModel)
     , m_query(std::move(query))
@@ -23,6 +24,7 @@ WorkflowBasic::WorkflowBasic(ChatRequestConfigModel *config,
     , m_contextPages(std::move(contextPages))
     , m_chat(std::move(chat))
     , m_decoratorPrompt(std::move(decoratorPrompt))
+    , m_options(std::move(options))
 {
 }
 
@@ -83,7 +85,8 @@ ChatRequest WorkflowBasic::nextRequest()
     return ChatRequest{ m_title,
                         m_currentConfig->selectedBackend().value(),
                         m_currentConfig->modelId(m_currentConfig->selectedModelIdx()),
-                        std::move(json) };
+                        std::move(json),
+                        m_options };
 }
 
 QJsonArray WorkflowBasic::chatAsJson() const

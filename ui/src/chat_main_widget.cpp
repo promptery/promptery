@@ -103,9 +103,13 @@ void ChatMainWidget::readSettings()
     m_chatModel->readSettings();
 
     m_settingWidget->readSettings();
-
     for (auto &page : m_pages) {
         page.page->readSettings();
+    }
+
+    m_settingWidget->updateUi();
+    for (auto &page : m_pages) {
+        page.page->updateUi();
     }
 }
 

@@ -3,7 +3,11 @@
 #include <ui/chat_request_config_model.h>
 #include <ui/chat_request_config_widget.h>
 #include <ui/combobox.h>
+#include <ui/label.h>
+#include <ui/request_config_widget.h>
 #include <ui/workflow_model.h>
+
+#include <model/ollama_config.h>
 
 #include <QGridLayout>
 #include <QLabel>
@@ -16,44 +20,35 @@ WorkflowWidget::WorkflowWidget(WorkflowModel *workflowModel, QWidget *parent)
     , m_layout(new QGridLayout(this))
     , m_cmbDecorator(new ComboBox(this))
     , m_cmbWorkflow(new ComboBox(this))
+    , m_ctx(newCtxSb(this))
+    , m_seed(newSeedSb(this))
+    , m_temp(newTemperatureSb(this))
 {
-    QFont font              = this->font();
-    const auto origFontSize = font.pointSize();
-    font.setPointSize(origFontSize - 2);
-    auto newLabel = [&font](QString &&text, QWidget *parent) {
-        auto *lbl = new QLabel(std::move(text), parent);
-        font.setBold(false);
-        lbl->setFont(font);
-        lbl->setIndent(8);
-        // lbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        return lbl;
-    };
-    auto newTitle = [&font, &origFontSize](QString &&text, QWidget *parent) {
-        auto *lbl = new QLabel(std::move(text), parent);
-        font.setBold(true);
-        font.setPointSize(origFontSize - 1);
-        lbl->setFont(font);
-        return lbl;
-    };
-
     m_layout->setVerticalSpacing(1);
     m_layout->setHorizontalSpacing(1);
     m_layout->setContentsMargins(6, 0, 0, 0);
 
-    m_layout->addWidget(newTitle(tr("Process"), this), 0, 0);
+    m_layout->addWidget(newTitleLabel(tr("Process"), this), 0, 0);
 
-    m_layout->addWidget(newLabel(tr("Workflow"), this), 0, 1);
+    m_layout->addWidget(newLabel(tr("Workflow"), this, 8), 0, 1);
     m_layout->addWidget(m_cmbWorkflow, 0, 2);
 
-    m_layout->addWidget(newLabel(tr("Decorator"), this), 0, 3);
+    m_layout->addWidget(newLabel(tr("Decorator"), this, 8), 0, 3);
     m_layout->addWidget(m_cmbDecorator, 0, 4);
     m_cmbDecorator->setSizePolicy(QSizePolicy::Expanding,
                                   m_cmbDecorator->sizePolicy().verticalPolicy());
 
-    m_layout->addWidget(newTitle(tr("Base model"), this), 1, 0);
+    m_layout->addWidget(newLabel(tr("Ctx T S"), this, 8), 0, 5);
+    auto options = std::make_unique<QHBoxLayout>();
+    options->addWidget(m_ctx);
+    options->addWidget(m_temp);
+    options->addWidget(m_seed);
+    m_layout->addLayout(options.release(), 0, 6);
+
+    m_layout->addWidget(newTitleLabel(tr("Base model"), this), 1, 0);
     m_baseModelConfig->setupUi(m_layout, 1);
 
-    m_layout->addWidget(newTitle(tr("Refiner model"), this), 2, 0);
+    m_layout->addWidget(newTitleLabel(tr("Refiner model"), this), 2, 0);
     m_refineModelConfig->setupUi(m_layout, 2);
 
     connect(m_workflowModel,
@@ -67,9 +62,13 @@ WorkflowWidget::WorkflowWidget(WorkflowModel *workflowModel, QWidget *parent)
             this,
             &WorkflowWidget::onSelectedWorkflowChanged);
     m_cmbWorkflow->setModel(m_workflowModel->workflowModel());
+
+    connect(m_ctx, &QSpinBox::valueChanged, this, &WorkflowWidget::onIntOptionsChanged);
+    connect(m_seed, &QSpinBox::valueChanged, this, &WorkflowWidget::onIntOptionsChanged);
+    connect(m_temp, &QDoubleSpinBox::valueChanged, this, &WorkflowWidget::onDoubleOptionsChanged);
 }
 
-void WorkflowWidget::showEvent(QShowEvent *event)
+void WorkflowWidget::updateUi()
 {
     // we preselect the first entry of each combobox if needed and possible
     m_cmbDecorator->setCurrentIndex(m_workflowModel->selectedDecoratorPromptIdx());
@@ -79,8 +78,6 @@ void WorkflowWidget::showEvent(QShowEvent *event)
     if (m_cmbDecorator->currentIndex() == -1 && m_cmbDecorator->count() > 0) {
         m_cmbDecorator->setCurrentIndex(0);
     }
-
-    m_workflowModel->readSettings();
 
     auto setRefinerState = [this](int index) {
         m_workflowModel->setSelectedWorkflowIdx(index);
@@ -103,6 +100,11 @@ void WorkflowWidget::showEvent(QShowEvent *event)
 
     m_baseModelConfig->readSettings();
     m_refineModelConfig->readSettings();
+
+    auto const &config = OllamaConfig::global();
+    m_ctx->setValue(config.ctx());
+    m_seed->setValue(config.seed());
+    m_temp->setValue(config.temp());
 }
 
 void WorkflowWidget::onSelectedDecoratorChanged()
@@ -115,4 +117,14 @@ void WorkflowWidget::onSelectedWorkflowChanged()
 {
     QSignalBlocker b(m_cmbWorkflow);
     m_cmbWorkflow->setCurrentIndex(m_workflowModel->selectedWorkflowIdx());
+}
+
+void WorkflowWidget::onIntOptionsChanged(int)
+{
+    m_workflowModel->setOptions(RequestOptions{ m_ctx->value(), m_seed->value(), m_temp->value() });
+}
+
+void WorkflowWidget::onDoubleOptionsChanged(double)
+{
+    onIntOptionsChanged(-1);
 }

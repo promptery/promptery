@@ -25,9 +25,18 @@ QString OllamaInterface::address() const
     return OllamaConfig::global().serverAddr("").toString();
 }
 
-QNetworkReply *OllamaInterface::asyncChat(QString &&model, QJsonArray &&messages)
+QNetworkReply *
+OllamaInterface::asyncChat(QString &&model, QJsonArray &&messages, const RequestOptions &options)
 {
-    QJsonObject json{ { "model", std::move(model) }, { "messages", std::move(messages) } };
+    QJsonObject jOptions{ { "num_ctx", options.num_ctx * 1024 },
+                          { "temperature", options.temperature } };
+    if (options.seed != -1) {
+        jOptions.insert("seed", options.seed);
+    }
+
+    QJsonObject json{ { "model", std::move(model) },
+                      { "messages", std::move(messages) },
+                      { "options", std::move(jOptions) } };
     return Downloader::global().postAsync(OllamaConfig::global().serverAddr("chat"),
                                           QJsonDocument(json));
 }

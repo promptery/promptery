@@ -8,7 +8,9 @@ class ComboBox;
 class WorkflowModel;
 class ChatRequestConfigWidget;
 
+class QDoubleSpinBox;
 class QGridLayout;
+class QSpinBox;
 
 class WorkflowWidget : public TileChildInterface
 {
@@ -18,13 +20,15 @@ public:
 
     TileChildData data() const override { return { "Process Config" }; }
 
-protected:
-    void showEvent(QShowEvent *event) override;
+    void updateUi();
 
 private:
     Q_SLOT void onSelectedDecoratorChanged();
 
     Q_SLOT void onSelectedWorkflowChanged();
+
+    Q_SLOT void onIntOptionsChanged(int);
+    Q_SLOT void onDoubleOptionsChanged(double);
 
     WorkflowModel *m_workflowModel;
 
@@ -36,4 +40,8 @@ private:
     ComboBox *m_cmbDecorator;
 
     ComboBox *m_cmbWorkflow;
+
+    QSpinBox *m_ctx;
+    QSpinBox *m_seed;
+    QDoubleSpinBox *m_temp;
 };

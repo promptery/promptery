@@ -10,8 +10,12 @@ public:
     QString id() const override { return "internal"; }
     QString name() const override { return "Debug backend"; }
 
-    QNetworkReply *asyncChat(QString &&model, QJsonArray &&messages) override;
-    QNetworkReply *asyncEmbed(QString && /*model*/, QString && /*text*/) override { return nullptr; }
+    QNetworkReply *
+    asyncChat(QString &&model, QJsonArray &&messages, const RequestOptions &options) override;
+    QNetworkReply *asyncEmbed(QString && /*model*/, QString && /*text*/) override
+    {
+        return nullptr;
+    }
 
 protected:
     void fetchModels() override;
@@ -29,7 +33,10 @@ public:
     QString id() const override { return "empty"; }
     QString name() const override { return "Empty backend"; }
 
-    QNetworkReply *asyncChat(QString &&, QJsonArray &&) override { return nullptr; }
+    QNetworkReply *asyncChat(QString &&, QJsonArray &&, const RequestOptions &) override
+    {
+        return nullptr;
+    }
     QNetworkReply *asyncEmbed(QString &&, QString &&) override { return nullptr; }
 
 protected:

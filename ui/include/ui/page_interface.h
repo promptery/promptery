@@ -24,6 +24,12 @@ public:
     virtual QWidget *sideView()            = 0;
 
     virtual void readSettings() {}
+
+    /**
+     * brief Will be called, after all widgets readSettings but befor show
+     */
+    virtual void updateUi() {}
+
     /**
      * @brief prepareStoreSettings should be used to write all data to the respective models
      */

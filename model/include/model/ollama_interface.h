@@ -13,7 +13,7 @@ public:
 
     bool isDefaultLlm() const override { return true; }
 
-    QNetworkReply *asyncChat(QString &&model, QJsonArray &&messages) override;
+    QNetworkReply *asyncChat(QString &&model, QJsonArray &&messages, const RequestOptions &options) override;
     QNetworkReply *asyncEmbed(QString &&model, QString &&text) override;
 
 protected:

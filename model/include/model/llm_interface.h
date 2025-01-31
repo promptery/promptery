@@ -17,6 +17,13 @@ struct ModelInformation {
     ModelType type{ ModelType::unknown };
 };
 
+// https://github.com/ollama/ollama/blob/main/docs/modelfile.md#parameter
+struct RequestOptions {
+    int num_ctx        = 2048;
+    int seed           = -1; // will not be sent when -1
+    double temperature = 0.8;
+};
+
 class LlmInterface : public QObject
 {
     Q_OBJECT
@@ -44,8 +51,9 @@ public:
         return m_models;
     }
 
-    virtual QNetworkReply *asyncChat(QString &&model, QJsonArray &&messages) = 0;
-    virtual QNetworkReply *asyncEmbed(QString &&model, QString &&text)       = 0;
+    virtual QNetworkReply *
+    asyncChat(QString &&model, QJsonArray &&messages, const RequestOptions &options) = 0;
+    virtual QNetworkReply *asyncEmbed(QString &&model, QString &&text)               = 0;
 
 protected:
     virtual void fetchModels() = 0;

@@ -45,6 +45,9 @@ public:
     int selectedWorkflowIdx() const;
     WorkflowData selectedWorkflow() const;
 
+    const RequestOptions &options() const { return m_options; }
+    void setOptions(RequestOptions options) { m_options = std::move(options); }
+
     void readSettings();
     void storeSettings() const;
 
@@ -56,4 +59,6 @@ private:
 
     WorkflowModelNEW *m_workflowRaw;
     WorkflowAdapter<WorkflowModelNEW> *m_workflows;
+
+    RequestOptions m_options;
 };

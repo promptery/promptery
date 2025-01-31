@@ -229,6 +229,11 @@ void ChatWidget::readSettings()
     m_fileTree->readSettings(cChat);
 }
 
+void ChatWidget::updateUi()
+{
+    m_workflowWidget->updateUi();
+}
+
 void ChatWidget::prepareStoreSettings()
 {
     writeTextToModel();
@@ -594,7 +599,8 @@ bool ChatWidget::startQuery(QString query, ContextFiles contextFiles, ContextPag
                                             std::move(contextFiles),
                                             std::move(contextPages),
                                             std::move(chat),
-                                            m_workflowModel->selectedDecoratorPrompt()));
+                                            m_workflowModel->selectedDecoratorPrompt(),
+                                            m_workflowModel->options()));
     } else if (workflow == "basic_cot") {
         return m_processor->start(
             std::make_unique<WorkflowBasicCoT>(m_workflowModel->baseModel(),
@@ -604,7 +610,8 @@ bool ChatWidget::startQuery(QString query, ContextFiles contextFiles, ContextPag
                                                std::move(contextFiles),
                                                std::move(contextPages),
                                                std::move(chat),
-                                               m_workflowModel->selectedDecoratorPrompt()));
+                                               m_workflowModel->selectedDecoratorPrompt(),
+                                               m_workflowModel->options()));
     }
     return false;
 }

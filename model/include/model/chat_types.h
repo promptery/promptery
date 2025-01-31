@@ -186,6 +186,7 @@ struct ChatRequest {
     LlmInterface *backend;
     QString model;
     QJsonArray ollamaMessages;
+    RequestOptions options;
 };
 
 struct ChatResponse {

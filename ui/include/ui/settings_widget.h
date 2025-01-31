@@ -5,6 +5,7 @@
 
 class BackendManager;
 
+class QDoubleSpinBox;
 class QLabel;
 class QLineEdit;
 class QSpinBox;
@@ -35,4 +36,8 @@ private:
     QLineEdit *m_ollamaIp;
     QSpinBox *m_ollamaPort;
     QLabel *m_ollamaStatus;
+
+    QSpinBox *m_optionsCtx;
+    QSpinBox *m_optionsSeed;
+    QDoubleSpinBox *m_optionsTemp;
 };

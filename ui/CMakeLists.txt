@@ -19,11 +19,13 @@ set(LIB_SOURCES
     include/ui/enhanced_treemodel.h
     include/ui/enhanced_treeview.h
     include/ui/file_system_model.h
+    include/ui/label.h
     include/ui/log_widget.h
     include/ui/model_interface.h
     include/ui/named_object_model.h
     include/ui/named_object_view.h
     include/ui/page_interface.h
+    include/ui/request_config_widget.h
     include/ui/settings_widget.h
     include/ui/system_prompt_model.h
     include/ui/system_prompt_widget.h

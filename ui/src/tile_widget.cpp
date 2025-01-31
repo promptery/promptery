@@ -1,6 +1,7 @@
 #include <ui/tile_widget.h>
 
 #include <ui/defines.h>
+#include <ui/label.h>
 #include <ui/tile_child_interface.h>
 
 #include <QHBoxLayout>
@@ -13,7 +14,7 @@ TileWidget::TileWidget(TileChildInterface *child, QWidget *parent)
     , m_tileLayout(new QVBoxLayout(this))
     , m_header(new QWidget(this))
     , m_headerLayout(new QHBoxLayout(m_header))
-    , m_title(new QLabel(this))
+    , m_title(newSectionLabel("", this))
 {
     m_tileLayout->setContentsMargins(0, 0, 0, 0);
     m_tileLayout->setSpacing(0);
@@ -23,9 +24,6 @@ TileWidget::TileWidget(TileChildInterface *child, QWidget *parent)
     m_title->setMinimumWidth(100);
     m_title->setMinimumHeight(cHeaderHeight);
     m_title->setText(child->data().name);
-    auto font = m_title->font();
-    font.setBold(true);
-    m_title->setFont(font);
 
     m_headerLayout->setContentsMargins(0, 0, 0, 0);
     m_headerLayout->setSpacing(0);

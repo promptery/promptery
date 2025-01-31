@@ -41,8 +41,8 @@ bool WorkflowProcessor::beginNextStep()
             }
             m_responses.push_back(QString());
 
-            m_reply = request.backend->asyncChat(std::move(request.model),
-                                                 std::move(request.ollamaMessages));
+            m_reply = request.backend->asyncChat(
+                std::move(request.model), std::move(request.ollamaMessages), request.options);
             if (m_reply && m_reply->isOpen()) {
                 connect(m_reply, &QNetworkReply::readyRead, this, &WorkflowProcessor::readyRead);
                 connect(m_reply, &QNetworkReply::finished, this, &WorkflowProcessor::finishedReply);

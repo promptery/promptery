@@ -2,6 +2,7 @@
 
 #include <ui/chat_request_config_model.h>
 #include <ui/combobox.h>
+#include <ui/label.h>
 
 #include <QFont>
 #include <QGridLayout>
@@ -41,27 +42,9 @@ ChatRequestConfigWidget::ChatRequestConfigWidget(ChatRequestConfigModel *model, 
 
 void ChatRequestConfigWidget::setupUi(QGridLayout *parentGrid, int row)
 {
-    QFont font              = m_parent->font();
-    const auto origFontSize = font.pointSize();
-    font.setPointSize(origFontSize - 2);
-    auto newLabel = [&font](QString &&text, QWidget *parent) {
-        auto *lbl = new QLabel(std::move(text), parent);
-        lbl->setFont(font);
-        lbl->setIndent(8);
-        // lbl->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        return lbl;
-    };
-    auto newTitle = [&font, &origFontSize](QString &&text, QWidget *parent) {
-        auto *lbl = new QLabel(std::move(text), parent);
-        font.setBold(true);
-        font.setPointSize(origFontSize - 1);
-        lbl->setFont(font);
-        return lbl;
-    };
-
-    parentGrid->addWidget(newLabel(tr("Backend"), m_parent), row, 1);
-    parentGrid->addWidget(newLabel(tr("Model"), m_parent), row, 3);
-    parentGrid->addWidget(newLabel(tr("System"), m_parent), row, 5);
+    parentGrid->addWidget(newLabel(tr("Backend"), m_parent, 8), row, 1);
+    parentGrid->addWidget(newLabel(tr("Model"), m_parent, 8), row, 3);
+    parentGrid->addWidget(newLabel(tr("System"), m_parent, 8), row, 5);
 
     parentGrid->addWidget(m_cmbBackend, row, 2);
     parentGrid->addWidget(m_cmbModel, row, 4);

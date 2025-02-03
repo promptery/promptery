@@ -7,6 +7,8 @@
 
 #include <vector>
 
+#include <llm_interface.h>
+
 class LlmInterface;
 struct ContextFiles {
     QString rootPath;

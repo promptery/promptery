@@ -1,13 +1,13 @@
 #pragma once
 
+#include <model/llm_interface.h>
+
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QString>
 
 #include <vector>
-
-#include <llm_interface.h>
 
 class LlmInterface;
 struct ContextFiles {

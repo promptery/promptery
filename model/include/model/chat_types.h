@@ -1,5 +1,7 @@
 #pragma once
 
+#include <model/llm_interface.h>
+
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>

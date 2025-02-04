@@ -7,13 +7,6 @@ class ContentModel;
 class ChatRequestConfigModel;
 
 
-// Hier geht es weiter.
-// diese Klasse ausimplementierne und im ChatWidget den WorkflowProcessor einbauen
-// * OutputWidget anschließen
-// * ToDos im Processor
-// danach weitere Workflows definieren
-
-
 class WorkflowBasic : public WorkflowInterface
 {
 public:
@@ -27,12 +20,13 @@ public:
                   RequestOptions options);
 
     bool hasNext() const override { return !m_started; }
-    ChatRequest nextRequest() override;
     void finishRequest(ChatResponse /*response*/) override { /*nothing to do*/ }
 
     bool isComplexWorkflow() const override { return false; }
 
 protected:
+    void prepareNextRequest() override;
+
     QJsonArray chatAsJson() const;
 
     ChatRequestConfigModel *m_currentConfig;
@@ -61,48 +55,15 @@ public:
                      ContextPages contextPages,
                      ChatData chat,
                      DecoratorPromptData decoratorPrompt,
-                     RequestOptions options)
-        : WorkflowBasic(baseConfig,
-                        contentModel,
-                        std::move(query),
-                        std::move(contextFiles),
-                        std::move(contextPages),
-                        std::move(chat),
-                        std::move(decoratorPrompt),
-                        std::move(options))
-        , m_refineConfig(refineConfig)
-    {
-    }
+                     RequestOptions options);
 
     bool hasNext() const override { return m_counter < 2; }
-    ChatRequest nextRequest() override
-    {
-        if (m_counter == 0) {
-            m_title       = QObject::tr("Base step.");
-            m_queryStored = m_query;
-            m_query = "List the steps necessary for solving questions like the following. Only "
-                      "output the steps needed not the solution.\n\nQuestion:\n" +
-                      m_queryStored;
-            return WorkflowBasic::nextRequest();
-        } else if (m_counter == 1) {
-            m_title = QObject::tr("Refinement step.");
-            m_query = "Context:\n" + QString("\n````\n") + m_baseResponse + "\n````\n\n";
-            m_query +=
-                "Adhere to the given context to solve the following question:\n" + m_queryStored;
-            m_currentConfig = m_refineConfig;
-            return WorkflowBasic::nextRequest();
-        }
-        return ChatRequest{};
-    }
-    void finishRequest(ChatResponse response) override
-    {
-        if (m_counter == 0) {
-            m_baseResponse = response.response;
-        }
-        ++m_counter;
-    }
+    void finishRequest(ChatResponse response) override;
 
     bool isComplexWorkflow() const override { return true; }
+
+protected:
+    void prepareNextRequest() override;
 
 private:
     ChatRequestConfigModel *m_refineConfig;

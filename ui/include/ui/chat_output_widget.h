@@ -11,8 +11,10 @@ class OutputWidget : public QWidget
 public:
     explicit OutputWidget(QWidget *parent = nullptr);
 
+    void setTitle(const QString &title);
+
     void insertPlainText(const QString &text);
-    QString toPlainText() const { return m_textEdit->toPlainText(); }
+    QString toPlainText() const;
 
     QTextDocument *document() const { return m_textEdit->document(); }
 
@@ -20,8 +22,12 @@ public:
 
     void setGreyedOut(bool greyedOut);
 
+    void setThinking(bool thinking);
+
 private:
     void setStyleSheet(bool greyedOut);
 
+    QVBoxLayout *m_layout;
     QTextEdit *m_textEdit;
+    QString m_title;
 };

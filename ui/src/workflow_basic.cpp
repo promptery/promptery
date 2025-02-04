@@ -28,7 +28,7 @@ WorkflowBasic::WorkflowBasic(ChatRequestConfigModel *config,
 {
 }
 
-ChatRequest WorkflowBasic::nextRequest()
+void WorkflowBasic::prepareNextRequest()
 {
     m_started = true;
 
@@ -82,11 +82,11 @@ ChatRequest WorkflowBasic::nextRequest()
     auto json = chatAsJson();
     json.append(QJsonObject{ { "role", "user" }, { "content", m_query } });
 
-    return ChatRequest{ m_title,
-                        m_currentConfig->selectedBackend().value(),
-                        m_currentConfig->modelId(m_currentConfig->selectedModelIdx()),
-                        std::move(json),
-                        m_options };
+    m_nextRequest = ChatRequest{ m_title,
+                                 m_currentConfig->selectedBackend().value(),
+                                 m_currentConfig->modelId(m_currentConfig->selectedModelIdx()),
+                                 std::move(json),
+                                 m_options };
 }
 
 QJsonArray WorkflowBasic::chatAsJson() const
@@ -105,4 +105,57 @@ QJsonArray WorkflowBasic::chatAsJson() const
         }
     }
     return json;
+}
+
+//------------------------------------------------
+
+WorkflowBasicCoT::WorkflowBasicCoT(ChatRequestConfigModel *baseConfig,
+                                   ChatRequestConfigModel *refineConfig,
+                                   QAbstractItemModel *contentModel,
+                                   QString query,
+                                   ContextFiles contextFiles,
+                                   ContextPages contextPages,
+                                   ChatData chat,
+                                   DecoratorPromptData decoratorPrompt,
+                                   RequestOptions options)
+    : WorkflowBasic(baseConfig,
+                    contentModel,
+                    std::move(query),
+                    std::move(contextFiles),
+                    std::move(contextPages),
+                    std::move(chat),
+                    std::move(decoratorPrompt),
+                    std::move(options))
+    , m_refineConfig(refineConfig)
+{
+}
+
+void WorkflowBasicCoT::finishRequest(ChatResponse response)
+{
+    if (m_counter == 0) {
+        m_baseResponse = response.response;
+    }
+    ++m_counter;
+    prepareNextRequest();
+}
+
+void WorkflowBasicCoT::prepareNextRequest()
+{
+    if (m_counter == 0) {
+        m_title       = QObject::tr("Base step");
+        m_queryStored = m_query;
+        m_query       = "List the steps necessary for solving questions like the following. Only "
+                        "output the steps needed not the solution.\n\nQuestion:\n" +
+                  m_queryStored;
+        WorkflowBasic::prepareNextRequest();
+        return;
+    } else if (m_counter == 1) {
+        m_title = QObject::tr("Refinement step");
+        m_query = "Context:\n" + QString("\n````\n") + m_baseResponse + "\n````\n\n";
+        m_query += "Adhere to the given context to solve the following question:\n" + m_queryStored;
+        m_currentConfig = m_refineConfig;
+        WorkflowBasic::prepareNextRequest();
+        return;
+    }
+    m_nextRequest = ChatRequest{};
 }

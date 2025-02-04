@@ -151,7 +151,10 @@ int ChatRequestConfigModel::selectedModelIdx() const
 
 QString ChatRequestConfigModel::modelId(int idx) const
 {
-    return m_modelsModel->item(idx)->data().toString();
+    if (auto *item = m_modelsModel->item(idx)) {
+        return item->data().toString();
+    }
+    return "";
 }
 
 void ChatRequestConfigModel::setSelectedSystemPromptIdx(int index)

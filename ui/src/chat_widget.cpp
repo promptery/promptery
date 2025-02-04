@@ -343,6 +343,7 @@ void ChatWidget::clear()
         query->deleteLater();
     }
     m_queries.clear();
+    m_current = nullptr;
 }
 
 void ChatWidget::btnGoClicked()
@@ -388,8 +389,9 @@ void ChatWidget::btnGoClicked()
         },
         Qt::QueuedConnection);
 
-    if (startQuery(text, std::move(files), std::move(pages))) {
+    if (startWorkflow(createWorkflow(text, std::move(files), std::move(pages)))) {
         btnGoShowStop();
+        setCurrent(m_current);
     }
 }
 
@@ -478,8 +480,18 @@ ChatItemWidget *ChatWidget::createNewItem(int index)
         const auto it = std::find(m_queries.begin(), m_queries.end(), instance);
         if (it != m_queries.end()) {
             setCurrent(*it);
+
             const auto data = (*it)->itemData();
-            startQuery(data.input, data.contextFiles, data.pages);
+
+            auto workflow = createWorkflow(data.input, data.contextFiles, data.pages);
+            if (workflow->nextRequest().isValid()) {
+                m_current->clearOutput();
+                if (!startWorkflow(std::move(workflow))) {
+                    m_current->setHighlighted(false);
+                }
+            } else {
+                m_current->setHighlighted(false);
+            }
         }
     });
 
@@ -575,7 +587,8 @@ void ChatWidget::setScrollSpacerToIdealheight()
         Qt::QueuedConnection);
 }
 
-bool ChatWidget::startQuery(QString query, ContextFiles contextFiles, ContextPages contextPages)
+std::unique_ptr<WorkflowInterface>
+ChatWidget::createWorkflow(QString query, ContextFiles contextFiles, ContextPages contextPages)
 {
     ChatData chat{};
     for (auto it = m_queries.begin(); it != m_queries.end(); ++it) {
@@ -592,28 +605,32 @@ bool ChatWidget::startQuery(QString query, ContextFiles contextFiles, ContextPag
 
     const auto workflow = m_workflowModel->selectedWorkflow().name();
     if (workflow == "simple") {
-        return m_processor->start(
-            std::make_unique<WorkflowBasic>(m_workflowModel->baseModel(),
-                                            m_contentModel->itemModel(),
-                                            std::move(query),
-                                            std::move(contextFiles),
-                                            std::move(contextPages),
-                                            std::move(chat),
-                                            m_workflowModel->selectedDecoratorPrompt(),
-                                            m_workflowModel->options()));
-    } else if (workflow == "basic_cot") {
-        return m_processor->start(
-            std::make_unique<WorkflowBasicCoT>(m_workflowModel->baseModel(),
-                                               m_workflowModel->refineModel(),
+        return std::make_unique<WorkflowBasic>(m_workflowModel->baseModel(),
                                                m_contentModel->itemModel(),
                                                std::move(query),
                                                std::move(contextFiles),
                                                std::move(contextPages),
                                                std::move(chat),
                                                m_workflowModel->selectedDecoratorPrompt(),
-                                               m_workflowModel->options()));
+                                               m_workflowModel->options());
+    } else if (workflow == "basic_cot") {
+        return std::make_unique<WorkflowBasicCoT>(m_workflowModel->baseModel(),
+                                                  m_workflowModel->refineModel(),
+                                                  m_contentModel->itemModel(),
+                                                  std::move(query),
+                                                  std::move(contextFiles),
+                                                  std::move(contextPages),
+                                                  std::move(chat),
+                                                  m_workflowModel->selectedDecoratorPrompt(),
+                                                  m_workflowModel->options());
+    } else {
+        return nullptr;
     }
-    return false;
+}
+
+bool ChatWidget::startWorkflow(std::unique_ptr<WorkflowInterface> &&workflow)
+{
+    return workflow ? m_processor->start(std::move(workflow)) : false;
 }
 
 QJsonArray ChatWidget::chatAsJson(bool forSaving) const
@@ -639,8 +656,12 @@ QJsonArray ChatWidget::chatAsJson(bool forSaving) const
         }
         json.append(QJsonObject{ { "role", "user" }, { "content", data.input } });
         if (forSaving) {
-            json.append(
-                QJsonObject{ { "role", "assistant" }, { "content", data.outputWithSteps } });
+            QJsonArray outputs;
+            for (const auto &o : data.outputs) {
+                outputs.append(QJsonObject{ { "text", o } });
+            }
+
+            json.append(QJsonObject{ { "role", "assistant" }, { "content", std::move(outputs) } });
             json.append(QJsonObject{ { "role", "enabled" }, { "content", data.enabled } });
         } else {
             json.append(QJsonObject{ { "role", "assistant" }, { "content", data.finalOutput } });
@@ -651,12 +672,12 @@ QJsonArray ChatWidget::chatAsJson(bool forSaving) const
 
 void ChatWidget::procBeginBlock(int index, const QString &title)
 {
-    newOutput(m_current->startOutputSection(tr("==== %1 : %2 ====\n").arg(index).arg(title)));
+    newOutput(m_current->startOutputSection(tr("%1. %2").arg(index + 1).arg(title)));
 }
 
 void ChatWidget::procEndBlock(int index)
 {
-    newOutput(m_current->endOutputSection(tr("\n==== ~%1 ====\n\n").arg(index)));
+    m_current->endOutputSection();
 }
 
 void ChatWidget::procNewContent(const QString &content)

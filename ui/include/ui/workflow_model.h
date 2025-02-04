@@ -52,6 +52,7 @@ public:
     void storeSettings() const;
 
 private:
+    // ToDo: Hier brauchts ein weiteres Modell, dass die CoT - Prompts definieren lässt;
     WorkflowAdapter<DecoratorPromptModel> *m_decoratorPrompt;
 
     ChatRequestConfigModel *m_baseModel;

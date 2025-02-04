@@ -102,10 +102,11 @@ private:
     Q_SLOT void updateScroll();
     void setScrollSpacerToIdealheight();
 
-    bool startQuery(QString query, ContextFiles contextFiles, ContextPages contextPages);
+    std::unique_ptr<WorkflowInterface>
+    createWorkflow(QString query, ContextFiles contextFiles, ContextPages contextPages);
+    bool startWorkflow(std::unique_ptr<WorkflowInterface> &&workflow);
 
     QJsonArray chatAsJson(bool forSaving) const;
-
 
     Q_SLOT void procBeginBlock(int index, const QString &title);
     Q_SLOT void procEndBlock(int index);

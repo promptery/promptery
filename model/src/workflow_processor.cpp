@@ -34,7 +34,7 @@ bool WorkflowProcessor::beginNextStep()
 {
     if (m_workflow->hasNext()) {
         auto request = m_workflow->nextRequest();
-        if (request.backend) {
+        if (request.isValid()) {
             ++m_blockIndex;
             if (m_workflow->isComplexWorkflow()) {
                 Q_EMIT beginBlock(m_blockIndex, request.title);

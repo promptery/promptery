@@ -26,13 +26,15 @@ public:
     void setInput(const QString &input);
     void setInputContext(ContextFiles files, ContextPages pages);
 
+    void createAdditionalOutputSection();
+
     // returns the height diff of the output widget
     int insertOutput(const QString &output);
     void clearOutput();
 
     // currently only used to store the last section, otherwise as ``insertOutput``
-    int startOutputSection(const QString &output);
-    int endOutputSection(const QString &output);
+    int startOutputSection(const QString &outputTitle);
+    void endOutputSection();
 
     bool itemEnabled() const;
 
@@ -54,8 +56,11 @@ private:
     int insertAndResizeOutput(const QString &output);
 
     InputWidget *m_input;
-    OutputWidget *m_output;
+    std::vector<OutputWidget *> m_outputs;
+    OutputWidget *m_current = nullptr;
+
     QString m_finalOutput;
+    QString m_currentLine;
 
     QToolBar *m_inputBar;
     QWidget *m_activeIndicator;
@@ -66,4 +71,9 @@ private:
 
     bool m_enabled{ true };
     bool m_outputEmpty{ true };
+
+    enum class OutputModeState { normal, thinking };
+    OutputModeState m_state{ OutputModeState::normal };
+    int m_stateNesting{ 0 };
+    int m_requestedOutputs{ 0 };
 };

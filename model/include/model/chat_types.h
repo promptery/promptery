@@ -1,5 +1,7 @@
 #pragma once
 
+#include "llm_interface.h"
+
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -26,7 +28,7 @@ struct ChatData {
         QString input;
         ContextFiles contextFiles;
         ContextPages pages;
-        QString outputWithSteps;
+        std::vector<QString> outputs;
         QString finalOutput;
         bool enabled;
     };
@@ -44,11 +46,17 @@ struct ChatData {
             Interaction res;
             res.input       = interaction["input"].toString();
             res.finalOutput = interaction["output"].toString();
-            if (interaction.contains("outputWithSteps")) {
-                res.outputWithSteps = interaction["outputWithSteps"].toString();
+
+            if (interaction.contains("outputs")) {
+                const auto outputs = obj["outputs"].toArray();
+                res.outputs.reserve(outputs.size());
+                for (const auto &o : outputs) {
+                    const auto output = o.toObject();
+                    res.outputs.push_back(output["text"].toString());
+                }
             }
-            if (res.outputWithSteps.isEmpty()) {
-                res.outputWithSteps = res.finalOutput;
+            if (res.outputs.empty()) {
+                res.outputs.push_back(res.finalOutput);
             }
             res.enabled = interaction["enabled"].toBool();
 
@@ -91,17 +99,21 @@ struct ChatData {
             for (const auto &i : i.pages.ids) {
                 ids.append(i.toString());
             }
+            QJsonArray outputs;
+            for (const auto &o : i.outputs) {
+                outputs.append(QJsonObject{ { "text", o } });
+            }
 
-            arr.append(
-                QJsonObject{ { "input", i.input },
-                             { "contextFiles",
-                               QJsonObject{ { "rootPath", i.contextFiles.rootPath },
-                                            { "files", std::move(files) } } },
-                             { "contextPages", QJsonObject{ { "ids", std::move(ids) } } },
-                             { "outputWithSteps",
-                               i.outputWithSteps == i.finalOutput ? QString() : i.outputWithSteps },
-                             { "output", i.finalOutput },
-                             { "enabled", i.enabled } });
+            // ToDo: der output muss besser gespeichert werden, thinking und stages
+
+            arr.append(QJsonObject{ { "input", i.input },
+                                    { "contextFiles",
+                                      QJsonObject{ { "rootPath", i.contextFiles.rootPath },
+                                                   { "files", std::move(files) } } },
+                                    { "contextPages", QJsonObject{ { "ids", std::move(ids) } } },
+                                    { "outputs", std::move(outputs) },
+                                    { "output", i.finalOutput },
+                                    { "enabled", i.enabled } });
         }
 
         return QJsonObject{ { "interactions", std::move(arr) }, { "scroll", m_scroll } };
@@ -187,6 +199,9 @@ struct ChatRequest {
     QString model;
     QJsonArray ollamaMessages;
     RequestOptions options;
+
+    bool isEmpty() const { return title.isEmpty(); }
+    bool isValid() const { return (backend != nullptr) && !model.isEmpty(); }
 };
 
 struct ChatResponse {
@@ -198,11 +213,22 @@ class WorkflowInterface
 public:
     virtual ~WorkflowInterface() = default;
 
-    virtual bool hasNext() const                      = 0;
-    virtual ChatRequest nextRequest()                 = 0;
+    virtual bool hasNext() const = 0;
+    const ChatRequest &nextRequest()
+    {
+        if (m_nextRequest.isEmpty() && hasNext()) {
+            prepareNextRequest();
+        }
+        return m_nextRequest;
+    };
     virtual void finishRequest(ChatResponse response) = 0;
 
     virtual bool isComplexWorkflow() const = 0; // complex == several steps
+
+protected:
+    virtual void prepareNextRequest() = 0;
+
+    ChatRequest m_nextRequest{};
 };
 
 struct WorkflowData {

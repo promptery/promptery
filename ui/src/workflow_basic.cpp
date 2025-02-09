@@ -130,7 +130,7 @@ WorkflowBasicCoT::WorkflowBasicCoT(ChatRequestConfigModel *baseConfig,
 {
 }
 
-void WorkflowBasicCoT::finishRequest(ChatResponse response)
+void WorkflowBasicCoT::doFinishRequest(ChatResponse response)
 {
     if (m_counter == 0) {
         m_baseResponse = response.response;

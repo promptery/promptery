@@ -221,12 +221,26 @@ public:
         }
         return m_nextRequest;
     };
-    virtual void finishRequest(ChatResponse response) = 0;
+
+    ChatRequest takeRequest()
+    {
+        nextRequest();
+        auto r        = std::move(m_nextRequest);
+        m_nextRequest = {};
+        return r;
+    }
+
+    void finishRequest(ChatResponse response)
+    {
+        doFinishRequest(std::move(response));
+        m_nextRequest = {};
+    }
 
     virtual bool isComplexWorkflow() const = 0; // complex == several steps
 
 protected:
-    virtual void prepareNextRequest() = 0;
+    virtual void doFinishRequest(ChatResponse response) = 0;
+    virtual void prepareNextRequest()                   = 0;
 
     ChatRequest m_nextRequest{};
 };

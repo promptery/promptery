@@ -3,6 +3,9 @@
 
 build/*
 
+.cache/*
+.vscode/*
+
 *~
 *.autosave
 *.a

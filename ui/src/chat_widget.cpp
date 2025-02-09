@@ -383,8 +383,8 @@ void ChatWidget::btnGoClicked()
 
     QMetaObject::invokeMethod(
         this,
-        [this]() {
-            m_scrollTarget = std::max(0, m_current->geometry().y() - 50);
+        [this, y = m_current->geometry().y()]() {
+            m_scrollTarget = std::max(0, y - 50);
             m_scrollTimer.start(10);
         },
         Qt::QueuedConnection);
@@ -525,6 +525,8 @@ ChatItemWidget *ChatWidget::createNewItem(int index)
         m_queries.insert(m_queries.begin() + index, ptr);
         layout->insertWidget(index, ptr);
     }
+
+    ptr->show();
 
     return ptr;
 }

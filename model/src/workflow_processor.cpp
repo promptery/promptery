@@ -32,31 +32,27 @@ bool WorkflowProcessor::isActive() const
 
 bool WorkflowProcessor::beginNextStep()
 {
-    if (m_workflow->hasNext()) {
-        auto request = m_workflow->nextRequest();
-        if (request.isValid()) {
-            ++m_blockIndex;
-            if (m_workflow->isComplexWorkflow()) {
-                Q_EMIT beginBlock(m_blockIndex, request.title);
-            }
-            m_responses.push_back(QString());
-
-            m_reply = request.backend->asyncChat(
-                std::move(request.model), std::move(request.ollamaMessages), request.options);
-            if (m_reply && m_reply->isOpen()) {
-                connect(m_reply, &QNetworkReply::readyRead, this, &WorkflowProcessor::readyRead);
-                connect(m_reply, &QNetworkReply::finished, this, &WorkflowProcessor::finishedReply);
-                connect(m_reply,
-                        &QNetworkReply::errorOccurred,
-                        this,
-                        &WorkflowProcessor::errorOccurred);
-
-                return true;
-            } else {
-                cleanUpReply();
-            }
+    auto request = m_workflow->takeRequest();
+    if (request.isValid()) {
+        ++m_blockIndex;
+        if (m_workflow->isComplexWorkflow()) {
+            Q_EMIT beginBlock(m_blockIndex, request.title);
         }
-        return false;
+        m_responses.push_back(QString());
+
+        m_reply = request.backend->asyncChat(
+            std::move(request.model), std::move(request.ollamaMessages), request.options);
+        if (m_reply && m_reply->isOpen()) {
+            connect(m_reply, &QNetworkReply::readyRead, this, &WorkflowProcessor::readyRead);
+            connect(m_reply, &QNetworkReply::finished, this, &WorkflowProcessor::finishedReply);
+            connect(
+                m_reply, &QNetworkReply::errorOccurred, this, &WorkflowProcessor::errorOccurred);
+
+            return true;
+        } else {
+            cleanUpReply();
+        }
+        return true;
     }
 
     finish();

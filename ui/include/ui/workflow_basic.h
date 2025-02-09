@@ -20,11 +20,11 @@ public:
                   RequestOptions options);
 
     bool hasNext() const override { return !m_started; }
-    void finishRequest(ChatResponse /*response*/) override { /*nothing to do*/ }
 
     bool isComplexWorkflow() const override { return false; }
 
 protected:
+    void doFinishRequest(ChatResponse /*response*/) override { /* nothing to do*/ }
     void prepareNextRequest() override;
 
     QJsonArray chatAsJson() const;
@@ -58,11 +58,11 @@ public:
                      RequestOptions options);
 
     bool hasNext() const override { return m_counter < 2; }
-    void finishRequest(ChatResponse response) override;
 
     bool isComplexWorkflow() const override { return true; }
 
 protected:
+    void doFinishRequest(ChatResponse response) override;
     void prepareNextRequest() override;
 
 private:
